@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>仕様どおりに実装すれば安全か — イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/white.min.css">
+  <style>
+    :root {
+      --corporate-blue: #0072ba;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --border-gray: #cbd5e1;
+      --bg-white: #ffffff;
+    }
+    body { background: #1e293b; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif; }
+    .reveal { background: var(--bg-white); }
+    .reveal .slides section { width: 100% !important; height: 100% !important; padding: 0 !important; display: flex !important; flex-direction: column !important; }
+    .standard-header { height: 100px; padding: 24px 60px 16px; border-bottom: 4px solid var(--corporate-blue); display: flex; justify-content: space-between; align-items: flex-end; background: #fff; }
+    .standard-header h2 { font-size: 34px !important; font-weight: bold !important; color: var(--text-main) !important; margin: 0 !important; }
+    .standard-header .header-meta { font-size: 17px; font-weight: bold; color: var(--corporate-blue); }
+    .slide-body { flex: 1; padding: 36px 60px 48px; background: #fff; }
+    .two-column { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; height: 440px; }
+    .content-heading { font-size: 24px; font-weight: bold; color: var(--text-main); margin-bottom: 10px; display: flex; align-items: center; }
+    .content-heading::before { content: "■"; color: var(--corporate-blue); margin-right: 12px; font-size: 18px; }
+    .content-text { font-size: 21px; line-height: 1.75; color: #1e293b; margin-bottom: 24px; padding-left: 30px; }
+    .media-box { width: 100%; height: 440px; border: 1px solid var(--border-gray); border-radius: 6px; overflow: hidden; background: #fff; }
+    .media-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .simple-caption { font-size: 13px; color: var(--text-sub); text-align: center; margin-top: 6px; }
+    .cover-body { height: 100%; padding: 60px; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 50px; align-items: center; }
+    .cover-title { font-size: 42px !important; font-weight: bold !important; color: var(--text-main) !important; line-height: 1.35 !important; }
+    .cover-media { height: 480px; border: 1px solid var(--border-gray); border-radius: 6px; overflow: hidden; }
+    .cover-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <div class="cover-body">
+          <div class="cover-content">
+            <div>
+              <div style="color: var(--corporate-blue); font-size: 18px; font-weight: bold; letter-spacing: 0.05em;">発表資料</div>
+              <h1 class="cover-title">仕様どおりに実装すれば安全か<br>イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</h1>
+            </div>
+            <div style="font-size: 22px; color: var(--text-main); font-weight: bold; border-top: 1px solid var(--border-gray); padding-top: 20px;">
+              発表者：村上 大岳（愛知総合工科高校）／神波 真聖・柳浜 万里（Nyx Foundation）／釘宮 由成（Independent Researcher） CSS2026
+            </div>
+          </div>
+          <div class="cover-media">
+            
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>仕様準拠 ＝ 安全か</h2>
+          <span class="header-meta">背景・問い</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">公式ソフトはない</div>
+              <div class="content-text">各チームが共通の仕様書をもとに別々の実装（クライアント）を動かす</div>
+              <div class="content-heading">監査の中心</div>
+              <div class="content-text">「仕様どおりに作られているか」の確認</div>
+              <div class="content-heading">問い</div>
+              <div class="content-text">仕様どおりなら安全か。ファイナリティ破綻＝確定ブロックが覆り二重支払いに</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">1つの仕様書から複数のクライアントが分岐／確定ブロックの覆りを考える</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>安全性は証明済み、ただし条件つき</h2>
+          <span class="header-meta">Casper FFG</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">Casper FFG</div>
+              <div class="content-text">預けた資産の重みつき投票。全体の2/3以上＝クォーラムで確定</div>
+              <div class="content-heading">accountable safety</div>
+              <div class="content-text">相反する2ブロックが同時確定しても違反投票者を特定・処罰できる</div>
+              <div class="content-heading">証明は条件つき</div>
+              <div class="content-text">2つのクォーラムは必ず重なる／重なりの二重投票者は検出・処罰される</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">2つの円（各2/3）が重なるベン図。重なり＝二重投票者を処罰</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>その前提は仕様書に書いてあるか</h2>
+          <span class="header-meta">問題設定</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">仕様書の役目</div>
+              <div class="content-text">全クライアントが同じ動作をする手順を定めること</div>
+              <div class="content-heading">届く範囲の話</div>
+              <div class="content-text">仕様書だけ読む監査は証明の前提を検査項目に載せられない</div>
+              <div class="content-heading">本研究の問い</div>
+              <div class="content-text">証明の前提のうち仕様書にはっきり書かれているものはどれだけあるか</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">実装の良し悪しではなく仕様準拠監査の届く範囲の話</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>証明から前提を機械的に取り出す</h2>
+          <span class="header-meta">手法・前半</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">出発点</div>
+              <div class="content-text">Casper FFGの安全性をLean 4で形式化（gasper-lean4、17定理、sorryゼロ）</div>
+              <div class="content-heading">must-establish分解</div>
+              <div class="content-text">定理の引数一覧＝確立すべき前提。LLMを介さない決定的な変換</div>
+              <div class="content-heading">結果</div>
+              <div class="content-text">17定理 → 延べ57件（1定理あたり平均約3.4件）</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">定理の形「仮定 → 結論」。仮定部分＝前提リスト</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>仕様書と1件ずつ突き合わせる</h2>
+          <span class="header-meta">手法・後半</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">E／非Eの二値</div>
+              <div class="content-text">各前提をconsensus-specsの文章と突き合わせ</div>
+              <div class="content-heading">判定器は7つ</div>
+              <div class="content-text">キーワード照合1＋系統の異なるLLM 6（同一プロンプト）</div>
+              <div class="content-heading">限界を先に示す</div>
+              <div class="content-text">人手の正解ラベル未実施。一致率は判定器どうしの一致で正解一致ではない</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">7器が同じ方向に誤る可能性は残る</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>前提の大半は仕様に書かれていない</h2>
+          <span class="header-meta">結果</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">57件中48件（84.2%）</div>
+              <div class="content-text">7器すべてで非E（明示なし）。全員一致Eは0件</div>
+              <div class="content-heading">判定器どうしの一致は高い</div>
+              <div class="content-text">平均一致率0.913、PABAK 0.826（偶然の一致を補正）</div>
+              <div class="content-heading">象徴的</div>
+              <div class="content-text">quorumの語は稼働中フォークの仕様散文に一度も出てこない</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">57マス中48が非E。下に「全員一致Eは0件」</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>結果の読み方</h2>
+          <span class="header-meta">解釈</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">全89ファイルを探索</div>
+              <div class="content-text">安全性の話が一切ないわけではない</div>
+              <div class="content-heading">weak-subjectivity等</div>
+              <div class="content-text">くだけた保証・脅威モデルには触れる</div>
+              <div class="content-heading">差分</div>
+              <div class="content-text">「くだけた保証」と「検査できる前提」の間にある</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">weak-subjectivity.md／fast-confirmation.mdは存在する</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>一例：主定理の前提と過去の実バグ</h2>
+          <span class="header-meta">事例</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">¬ q_intersection_slashed</div>
+              <div class="content-text">クォーラム交差の帰責＝7器全会一致で非E</div>
+              <div class="content-heading">同じlabelに実バグ</div>
+              <div class="content-text">Nimbus PR#461（正当化ビットの整数オーバーフロー）・Lighthouse PR#4576</div>
+              <div class="content-heading">因果は主張しない</div>
+              <div class="content-text">位置的な共起のみ。実害はブラインド再検出に委ねる</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">label一致であってコード経路の同一確認はしていない</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>位置づけ：監査の届く範囲と方法論</h2>
+          <span class="header-meta">貢献</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">「仕様がバグ」ではない</div>
+              <div class="content-text">大域仮定を仕様に書け、とも言わない</div>
+              <div class="content-heading">主張</div>
+              <div class="content-text">仕様だけを入力にする監査は証明の前提を構造的に拾えない</div>
+              <div class="content-heading">貢献</div>
+              <div class="content-text">前提を検査項目に変換し差分を測る手順。57件はLeanを読まずに使える成果物</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">Ethereumは具体例</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>今後の展望</h2>
+          <span class="header-meta">限界と今後</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">限界</div>
+              <div class="content-text">判定は機械＋LLMのみで人手なし／下流の実害は未評価</div>
+              <div class="content-heading">ブラインド再検出</div>
+              <div class="content-text">実バグを見ずに作ったLean由来項目 vs 仕様のみ項目で比較</div>
+              <div class="content-heading">人手検証・横展開</div>
+              <div class="content-text">独立アノテータによる正解ラベル／Tendermint・HotStuffへ</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">共起が作り方の産物でないかを確かめる</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="standard-header">
+          <h2>まとめ</h2>
+          <span class="header-meta">CSS2026</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-column">
+            <div>
+              <div class="content-heading">仕様準拠の限界</div>
+              <div class="content-text">安全性証明の前提までは保証しない</div>
+              <div class="content-heading">57件中48件（84.2%）</div>
+              <div class="content-text">仕様に非明示。見落としを数値化し補う手順</div>
+              <div class="content-heading">再現性</div>
+              <div class="content-text">4資産をcommit／タグで固定・公開</div></div>
+            <div>
+              <div class="media-box">
+                
+              </div>
+              <div class="simple-caption">ご清聴ありがとうございました</div>
+            </div>
+          </div>
+        </div>
+      </section></div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+  <script>
+    Reveal.initialize({ width: 1280, height: 720, margin: 0, center: false, slideNumber: 'c/t', keyboard: true });
+  </script>
+</body>
+</html>
