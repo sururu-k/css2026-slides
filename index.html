@@ -94,7 +94,7 @@
 
             <div class="key-message-box">
               <h4><i class="fa-solid fa-bullseye"></i> 本日の結論</h4>
-              <p>「仕様コードの丸写しは危険！証明の『隠れた全体前提』をアサーションで確認しよう」</p>
+              <p>「お手本コードの丸写しは危険！証明の『隠れた全体ルール』を自動停止装置（アサーション）で確認しよう」</p>
             </div>
 
             <div style="font-size: 20px; color: var(--text-sub); font-weight: bold; margin-top: 35px; border-top: 2px solid #cbd5e1; padding-top: 20px;">
@@ -104,27 +104,27 @@
         </div>
       </section>
 
-      <!-- SLIDE 2: CSS2026 Audience Benefits (Foreshadowing) -->
+      <!-- SLIDE 2: CSS2026 Audience Benefits -->
       <section id="slide-benefits">
         <div class="standard-header">
-          <h2>CSS2026参加者が得られる最大利益</h2>
-          <span class="header-meta">汎用セキュリティへの発展</span>
+          <h2>この発表であなたが獲れる情報・ツール</h2>
+          <span class="header-meta">Benefits for CSS2026 Audience</span>
         </div>
         <div class="slide-body">
           <div class="single-col">
             <div class="card" style="border-left: 8px solid var(--highlight-purple);">
-              <h4><i class="fa-solid fa-flask"></i> 1. 形式手法・セキュリティ検証研究者へ</h4>
-              <p>証明型から安全仮定（Assumption）を抽出し仕様書の穴を特定する <strong>「汎用セキュリティ解析フレームワーク」を獲得できる！</strong></p>
+              <h4><i class="fa-solid fa-flask"></i> 1. セキュリティ研究者・検証者へ</h4>
+              <p>形式証明（Lean 4）から安全前提を自動抽出し仕様書の穴を特定する <strong>「解析手法」を獲得できる！</strong></p>
             </div>
 
             <div class="card" style="border-left: 8px solid var(--corporate-blue);">
-              <h4><i class="fa-solid fa-diagram-project"></i> 2. 分散システム・プロトコル設計者へ（Web3・一般システム共通）</h4>
-              <p>仕様の他言語移植における暗黙前提の破綻を防ぐ <strong>「自前アサーションによる安全設計指針」を獲得できる！</strong></p>
+              <h4><i class="fa-solid fa-diagram-project"></i> 2. 分散システム・プロトコル設計者へ（Web3・一般共通）</h4>
+              <p>仕様を移植する際のバグを防ぐ <strong>「自動停止メカニズムによる安全設計指針」を獲得できる！</strong></p>
             </div>
 
             <div class="card" style="border-left: 8px solid var(--highlight-red);">
               <h4><i class="fa-solid fa-shield-halved"></i> 3. システム監査員・脆弱性診断員へ</h4>
-              <p>仕様通りか見るだけの監査を脱し、隠れた危険領域を特定する <strong>「57件の危険前提リスト」を診断ツールとして獲得できる！</strong></p>
+              <p>仕様通りか見るだけの監査を脱し、隠れた危険領域を特定する <strong>「57件の危険前提リスト」を獲得できる！</strong></p>
             </div>
           </div>
         </div>
@@ -133,66 +133,66 @@
       <!-- SLIDE 3: Core Question & Multi-implementation -->
       <section>
         <div class="standard-header">
-          <h2>本日の問いと「多実装環境」</h2>
+          <h2>本日の問いと「公式ソフトがない仕組み」</h2>
           <span class="header-meta">問題意識</span>
         </div>
         <div class="slide-body">
           <div class="single-col">
             <div class="card" style="border-left: 8px solid var(--highlight-red); padding: 30px; text-align: center; margin-bottom: 25px;">
               <h3 style="font-size: 32px; color: var(--highlight-red); margin: 0 0 10px 0;"><i class="fa-solid fa-circle-question"></i> 核心の問い</h3>
-              <p style="font-size: 26px; font-weight: bold; color: var(--text-main); margin: 0;">「各クライアントを仕様書通りに作っていれば、本当に安全と言いきれるのか？」</p>
+              <p style="font-size: 26px; font-weight: bold; color: var(--text-main); margin: 0;">「みんなが仕様書通りに作っていれば、本当に安全と言いきれるのか？」</p>
             </div>
 
-            <div class="content-heading"><i class="fa-solid fa-network-wired"></i> 背景：イーサリアムの「多実装環境」</div>
+            <div class="content-heading"><i class="fa-solid fa-network-wired"></i> 背景：イーサリアムの「公式ソフトがない仕組み（多実装環境）」</div>
             <div class="content-text">
-              特定コードへの依存（SPoF）を防ぐため公式ソフトが存在せず、世界中の独立チームが Go, Rust, Java 等で開発・運用。
+              1つのソフトのバグで全体が止まるのを防ぐため、共通仕様書をもとに Go, Rust, Java など別々の言語で開発・運用。
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SLIDE 4: Casper FFG & Finality -->
+      <!-- SLIDE 4: Finality Rule -->
       <section>
         <div class="standard-header">
-          <h2>確定（ファイナリティ）の仕組み</h2>
+          <h2>取引が確定する（ファイナリティ）ルール</h2>
           <span class="header-meta">Casper FFG</span>
         </div>
         <div class="slide-body">
           <div class="two-col-grid">
             <div>
               <div class="content-heading"><i class="fa-solid fa-lock"></i> ファイナリティ</div>
-              <div class="content-text">一度確定した取引は絶対に覆らない保証。</div>
+              <div class="content-text">「一度決まった取引は絶対に覆らない」という保証。</div>
 
               <div class="content-heading"><i class="fa-solid fa-check-to-slot"></i> Casper FFG</div>
-              <div class="content-text">検証者が投票し、全体の <strong>2/3 以上</strong> の投票が集まると「確定」。</div>
+              <div class="content-text">参加者が投票し、全体の <strong>2/3 以上の投票</strong> が集まると「確定」。</div>
             </div>
 
             <div class="card" style="border-left: 6px solid var(--corporate-blue); display: flex; flex-direction: column; justify-content: center;">
-              <h4><i class="fa-solid fa-shield-halved"></i> 安全性の証明（Accountable Safety）</h4>
-              <p>万が一2つのブロックが同時に確定しても、<strong>両方に投票した違反者を特定して資産を没収（スラッシュ）できる</strong>。</p>
+              <h4><i class="fa-solid fa-shield-halved"></i> 違反者を没収できる安全の仕組み</h4>
+              <p>万が一2つの取引が同時に確定しても、<strong>両方に投票したズルい違反者を特定して預託資産を没収できる</strong>。</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SLIDE 5: Hidden Assumption -->
+      <!-- SLIDE 5: Plain Explanation: Why 2/3 Voting is Safe (REWRITTEN) -->
       <section>
         <div class="standard-header">
-          <h2>見落とされがちな「前提条件」</h2>
-          <span class="header-meta">隠された前提</span>
+          <h2>なぜ 2/3 の投票で安全と言えるのか？</h2>
+          <span class="header-meta">わかりやすい解説</span>
         </div>
         <div class="slide-body">
           <div class="two-col-grid">
             <div class="card" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
-              <h4 style="justify-content: center; font-size: 28px;"><i class="fa-solid fa-calculator"></i> 算術的な重なり</h4>
+              <h4 style="justify-content: center; font-size: 28px;"><i class="fa-solid fa-calculator"></i> 投票の算術的な重なり</h4>
               <p style="font-size: 32px; font-weight: bold; color: var(--corporate-blue); margin: 15px 0;">2/3 ＋ 2/3 ＝ 4/3 ＞ 1</p>
-              <p>2つの確定があれば<strong>必ず 1/3 以上が重複</strong>（二重投票者）</p>
+              <p>2つの確定があれば<strong>必ず 1/3 以上が二重投票のズルをしている</strong></p>
             </div>
 
             <div class="card" style="border-left: 8px solid var(--highlight-red); display: flex; flex-direction: column; justify-content: center;">
-              <h4 style="color: var(--highlight-red); font-size: 26px;"><i class="fa-solid fa-triangle-exclamation"></i> 隠れた前提条件（Assumption）</h4>
-              <p style="font-size: 24px; font-weight: bold; color: var(--text-main);">「重なった違反者がシステム上で確実に検出・処罰される」</p>
-              <p style="font-size: 18px; color: var(--text-sub); margin-top: 10px;">※ この前提が守られて初めて安全性が成立する</p>
+              <h4 style="color: var(--highlight-red); font-size: 26px;"><i class="fa-solid fa-triangle-exclamation"></i> 隠された前提条件</h4>
+              <p style="font-size: 24px; font-weight: bold; color: var(--text-main);">「重なったズルい違反者が、コード上で確実に自動検出されて処分（没収）される」</p>
+              <p style="font-size: 18px; color: var(--text-sub); margin-top: 10px;">※ この前提がコードで守られていて初めて安全と言える！</p>
             </div>
           </div>
         </div>
@@ -201,26 +201,26 @@
       <!-- SLIDE 6: EIP Spec Limits -->
       <section>
         <div class="standard-header">
-          <h2>仕様書（EIP）の穴</h2>
+          <h2>仕様書（EIP）の中身と限界</h2>
           <span class="header-meta">EIP &amp; Code</span>
         </div>
         <div class="slide-body">
           <div class="two-col-grid">
             <div>
               <div class="content-heading"><i class="fa-solid fa-file-code"></i> 仕様書の中身</div>
-              <div class="content-text">英語の文章 ＋ 実際に動く <strong>Python テストコード</strong>。</div>
+              <div class="content-text">英語の説明文章 ＋ 実際に動かせる <strong>Python のお手本コード</strong>。</div>
 
               <div class="content-heading"><i class="fa-solid fa-circle-xmark" style="color: var(--highlight-red);"></i> 仕様書の限界</div>
               <div class="content-text">
-                ・<strong>書いてあること</strong>: 各ステップの計算手順（How）<br>
-                ・<strong>書かれていないこと</strong>: 証明が前提にする全体ルール（Why）
+                ・<strong>書いてあること</strong>: 1ステップごとの「計算の手順」（How）<br>
+                ・<strong>書かれていないこと</strong>: 「なぜこれで安全と言えるのか（全体ルール）」（Why）
               </div>
             </div>
 
             <div class="code-box">
               <span style="color: #f472b6;">if</span> matching_target_balance * <span style="color: #facc15;">3</span> >= total_active_balance * <span style="color: #facc15;">2</span>:<br>
               &nbsp;&nbsp;&nbsp;&nbsp;state.current_justified_checkpoint = ...<br><br>
-              <span style="color: #ef4444;"># 手順はあるが「全体安全ルール」は未記載</span>
+              <span style="color: #ef4444;"># 手順はあるが「全体ルール」は未記載</span>
             </div>
           </div>
         </div>
@@ -229,21 +229,21 @@
       <!-- SLIDE 7: Assertion Concept -->
       <section>
         <div class="standard-header">
-          <h2>対策の鍵：「アサーション」とは</h2>
+          <h2>対策の鍵：「自動停止安全装置（アサーション）」とは</h2>
           <span class="header-meta">用語解説</span>
         </div>
         <div class="slide-body">
           <div class="single-col">
             <div class="card" style="border-left: 8px solid var(--corporate-blue);">
-              <h4><i class="fa-solid fa-shield-cat"></i> アサーション（Assertion）</h4>
-              <p style="font-size: 24px; font-weight: bold; color: var(--text-main);">「この時点で絶対にこのルールが成り立っていなければおかしい」という前提を自動チェックする安全装置</p>
+              <h4><i class="fa-solid fa-shield-cat"></i> 自動停止安全装置（アサーション）とは</h4>
+              <p style="font-size: 24px; font-weight: bold; color: var(--text-main);">「この時点で絶対にこのルールが成り立っていなければおかしい」という前提を自動チェックし、違反があれば即座に安全停止させる仕掛け</p>
             </div>
 
-            <div class="content-heading"><i class="fa-solid fa-plane-triangle-exclamation"></i> 例え</div>
-            <div class="content-text">飛行機の「高度がマイナスになったら自動で緊急ブレーキを引く」メカニズム。</div>
+            <div class="content-heading"><i class="fa-solid fa-plane-triangle-exclamation"></i> 身近な例え</div>
+            <div class="content-text">飛行機の「高度がマイナスになったら即座に自動停止ブレーキを引く」メカニズム。</div>
 
             <div class="content-heading"><i class="fa-solid fa-triangle-exclamation" style="color: var(--highlight-red);"></i> 必要な対策</div>
-            <div class="content-text">仕様書コードにない前提確認アサーションを、自前コードに仕込むこと！</div>
+            <div class="content-text">仕様書のお手本コードにない前提確認チェックを、自分のコード内に自前で仕込むこと！</div>
           </div>
         </div>
       </section>
@@ -251,13 +251,13 @@
       <!-- SLIDE 8: Premise Extraction -->
       <section>
         <div class="standard-header">
-          <h2>実験：証明から前提条件を取り出す</h2>
+          <h2>実験：数学の証明から前提条件を取り出す</h2>
           <span class="header-meta">Lean 4 抽出</span>
         </div>
         <div class="slide-body">
           <div class="single-col">
-            <div class="content-heading"><i class="fa-solid fa-calculator" style="color: var(--highlight-purple);"></i> Lean 4 形式証明から前提を抽出</div>
-            <div class="content-text">証明定理（CHK-GEN-09 など）の型から「違反者が未処罰で残らないこと（`¬q_intersection_slashed`）」を取り出す。</div>
+            <div class="content-heading"><i class="fa-solid fa-calculator" style="color: var(--highlight-purple);"></i> Lean 4 形式証明から前提ルールを抽出</div>
+            <div class="content-text">安全性を証明した Lean 4 という数学ツール（17個の定理）から前提ルールをプログラムで自動抽出。</div>
 
             <div class="flow-steps">
               <div class="flow-step-box">
@@ -271,8 +271,8 @@
               </div>
               <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               <div class="flow-step-box" style="border-color: var(--corporate-blue); background: #eff6ff;">
-                <h5>57 件の前提リスト</h5>
-                <p>要件リスト化</p>
+                <h5>57 件の前提ルール</h5>
+                <p>リスト化</p>
               </div>
             </div>
           </div>
@@ -282,7 +282,7 @@
       <!-- SLIDE 9: Results Chart -->
       <section>
         <div class="standard-header">
-          <h2>結果：84.2% が仕様書に書かれていない！</h2>
+          <h2>結果：84.2% の前提ルールが仕様書に書かれていない！</h2>
           <span class="header-meta">分析結果</span>
         </div>
         <div class="slide-body">
@@ -291,10 +291,10 @@
               <div class="content-heading"><i class="fa-solid fa-chart-pie" style="color: var(--highlight-red);"></i> 分析結果</div>
               <div class="content-text">57件中 <strong>48件（84.2%）</strong> が仕様書に <strong>未記載</strong>。（全員一致で明記とされた前提は 0 件）</div>
 
-              <div class="content-heading"><i class="fa-solid fa-code-compare"></i> ギャップ</div>
+              <div class="content-heading"><i class="fa-solid fa-code-compare"></i> ギャップの例</div>
               <div class="content-text">
-                ・<strong>仕様書</strong>: 関数の局所的な動き (`is_slashable`)<br>
-                ・<strong>証明前提</strong>: 全体で保つべき安全ルール (`q_intersection_slashed`)
+                ・<strong>仕様書</strong>: 「2回投票があったらフラグを立てる」（個々の関数の動き）<br>
+                ・<strong>証明前提</strong>: 「ズルい違反者が未処理のまま確定に至らない」（全体ルール）
               </div>
             </div>
 
@@ -317,15 +317,15 @@
       <!-- SLIDE 10: Real Bug Incident -->
       <section>
         <div class="standard-header">
-          <h2>実際の問題：仕様の抜けで起きた障害</h2>
+          <h2>実際の問題：仕様の抜けで起きた実際のバグ障害</h2>
           <span class="header-meta">バグ事例</span>
         </div>
         <div class="slide-body">
           <div class="two-col-grid">
             <div class="card" style="border-top: 6px solid var(--highlight-red);">
               <h4 style="color: var(--highlight-red); font-size: 28px;"><i class="fa-solid fa-bug"></i> Nimbus PR#461（チェーン分裂）</h4>
-              <p style="margin-bottom: 12px;"><strong>障害</strong>: 確定判定がズレ、ネットワークが分裂！</p>
-              <p style="color: var(--highlight-green); font-weight: bold;"><strong>修正</strong>: ビット計算のアサーションを追加。</p>
+              <p style="margin-bottom: 12px;"><strong>障害</strong>: 計算ミスにより確定の判定がズレ、ネットワークが実際に 2 つに分裂！</p>
+              <p style="color: var(--highlight-green); font-weight: bold;"><strong>修正</strong>: ビット計算の自動停止チェック（アサーション）を追加。</p>
             </div>
 
             <div class="card" style="border-top: 6px solid var(--corporate-blue);">
@@ -340,7 +340,7 @@
       <!-- SLIDE 11: Foreshadowing Recovery Slide -->
       <section>
         <div class="standard-header">
-          <h2>伏線回収：それって Web3（ブロックチェーン）だけの話？</h2>
+          <h2>伏線回収：それって Web3 だけでしか使えない話？</h2>
           <span class="header-meta">本質的考察</span>
         </div>
         <div class="slide-body">
@@ -348,14 +348,14 @@
             <div class="card" style="border-left: 8px solid var(--highlight-purple); background: #faf5ff;">
               <h4 style="color: var(--highlight-purple); font-size: 26px;"><i class="fa-solid fa-circle-question"></i> なぜ Web3（イーサリアム）だったのか？</h4>
               <p style="font-size: 22px; color: var(--text-main);">
-                「公式ソフトがなく仕様書から多様な言語に丸写し移植される」という極限環境だったため、<strong>最初にバグ障害として表面化した</strong>。
+                「公式ソフトがなく、共通仕様を多様な言語に丸写し移植する」という環境だったため、<strong>最初にバグとして問題が表面化しただけ</strong>。
               </p>
             </div>
 
             <div class="card" style="border-left: 8px solid var(--corporate-blue);">
               <h4 style="font-size: 26px;"><i class="fa-solid fa-network-wired"></i> 本質：あらゆる分散システム・プロトコル共通の課題</h4>
               <p style="font-size: 22px; color: var(--text-main);">
-                仕様移植時に暗黙前提が壊れてバグになる問題は、<strong>Raft / Paxos / 金融決済 / OS / ネットワークプロトコル全般の普遍的リスク！</strong>
+                仕様を他言語へ移植する際、モデルの暗黙前提が壊れる問題は、<strong>Raft / Paxos / 金融決済 / OS / ネットワークプロトコル全般共通の課題！</strong>
               </p>
             </div>
           </div>
@@ -371,10 +371,10 @@
         <div class="slide-body">
           <div class="single-col">
             <div class="card" style="border-left: 8px solid var(--highlight-green); padding: 22px;">
-              <h4 style="color: var(--highlight-green); font-size: 24px;"><i class="fa-solid fa-check-double"></i> 冒頭スライド（<a href="#/1" style="color: var(--corporate-blue); text-decoration: underline;">/#/1</a>）の伏線回収・理由</h4>
+              <h4 style="color: var(--highlight-green); font-size: 24px;"><i class="fa-solid fa-check-double"></i> 冒頭スライド（<a href="#/1" style="color: var(--corporate-blue); text-decoration: underline;">/#/1</a>）のおさらい・伏線回収</h4>
               <p style="font-size: 20px; line-height: 1.5; color: var(--text-main);">
-                ・<strong>研究者・監査員へ</strong>: 証明からの前提抽出手法と57前提リストは、あらゆるプロトコル仕様の穴を突く <strong>「漏れのない検証ツール」</strong> になる！<br>
-                ・<strong>設計者・開発者へ</strong>: 仕様丸写しを防ぐ自前アサーションは、次世代分散システムの <strong>「普遍的な安全設計指針」</strong> になる！
+                ・<strong>研究者・監査員へ</strong>: 本アプローチと 57 前提リストは、あらゆるプロトコル仕様の穴を突く <strong>「漏れのない検証ツール」</strong> になる！<br>
+                ・<strong>設計者・エンジニアへ</strong>: お手本コードの丸写しを防ぎ前提を監視する自動停止装置は、**「普遍的な安全設計指針」** になる！
               </p>
             </div>
 
