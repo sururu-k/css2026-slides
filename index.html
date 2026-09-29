@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>仕様どおりに実装すれば安全か — イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</title>
+  <!-- Reveal.js Themes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/white.min.css">
+  <!-- Devicon CDN for Programming Language Logos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/devicon/2.16.0/devicon.min.css">
+  <!-- Font Awesome CDN for Tech Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     :root {
       --corporate-blue: #0072ba;
@@ -24,8 +29,8 @@
     .slide-body { flex: 1; padding: 24px 50px 36px; background: #fff; box-sizing: border-box; }
     .two-column { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 30px; align-items: center; height: auto; min-height: 440px; overflow-wrap: break-word; word-break: break-word; }
     .content-heading { font-size: 22px; font-weight: bold; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; }
-    .content-heading::before { content: "■"; color: var(--corporate-blue); margin-right: 10px; font-size: 16px; }
-    .content-text { font-size: 18px; line-height: 1.6; color: #1e293b; margin-bottom: 20px; padding-left: 24px; }
+    .content-heading i { margin-right: 10px; color: var(--corporate-blue); font-size: 20px; }
+    .content-text { font-size: 18px; line-height: 1.6; color: #1e293b; margin-bottom: 20px; padding-left: 30px; }
     .content-text strong { color: var(--corporate-blue); }
     .media-box { width: 100%; height: auto; border: 1px solid var(--border-gray); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
     .media-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -36,8 +41,9 @@
     .cover-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tag-blue { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 14px; font-weight: bold; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; }
     .card-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 15px; }
-    .card-box h4 { margin: 0 0 10px 0; color: var(--corporate-blue); font-size: 19px; }
+    .card-box h4 { margin: 0 0 10px 0; color: var(--corporate-blue); font-size: 19px; display: flex; align-items: center; gap: 8px; }
     .card-box p { margin: 0; font-size: 16px; color: #334155; line-height: 1.5; }
+    .badge-icon { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; background: #f1f5f9; border: 1px solid #cbd5e1; }
   </style>
 </head>
 <body>
@@ -49,7 +55,7 @@
         <div class="cover-body">
           <div class="cover-content">
             <div>
-              <span class="tag-blue">CSS2026 発表資料</span>
+              <span class="tag-blue"><i class="fa-brands fa-ethereum"></i> CSS2026 発表資料</span>
               <h1 class="cover-title">仕様どおりに実装すれば安全か<br><span style="font-size: 26px; color: var(--text-sub); font-weight: normal;">— イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</span></h1>
             </div>
             <div style="font-size: 18px; color: var(--text-main); font-weight: bold; border-top: 2px solid var(--corporate-blue); padding-top: 20px;">
@@ -71,16 +77,23 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">イーサリアムとは</div>
+              <div class="content-heading"><i class="fa-brands fa-ethereum" style="color: #627eea;"></i> イーサリアムとは</div>
               <div class="content-text">分散型のブロックチェーンプラットフォーム。</div>
 
-              <div class="content-heading">「公式ソフト」が存在しない</div>
-              <div class="content-text">共通の仕様書をもとに、複数の開発チームが別々の言語でノード（<strong>クライアント</strong>）を開発・運用。</div>
+              <div class="content-heading"><i class="fa-solid fa-network-wired"></i> 「公式ソフト」が存在しない</div>
+              <div class="content-text">
+                共通の仕様書をもとに、複数の開発チームが別々の言語でノード（<strong>クライアント</strong>）を開発・運用。<br>
+                <span class="badge-icon"><i class="devicon-go-original colored"></i> Go</span>
+                <span class="badge-icon"><i class="devicon-rust-plain colored"></i> Rust</span>
+                <span class="badge-icon"><i class="devicon-java-plain colored"></i> Java</span>
+                <span class="badge-icon"><i class="devicon-csharp-plain colored"></i> C#</span>
+                <span class="badge-icon"><i class="devicon-typescript-plain colored"></i> TS</span>
+              </div>
 
-              <div class="content-heading">ファイナリティとは</div>
+              <div class="content-heading"><i class="fa-solid fa-lock"></i> ファイナリティとは</div>
               <div class="content-text">「一度確定した取引は絶対に覆らない」という性質。崩れると<strong>確定した取引が消えたり二重支払いが起きたりする</strong>。</div>
 
-              <div class="content-heading">本研究の問い</div>
+              <div class="content-heading"><i class="fa-solid fa-circle-question"></i> 本研究の問い</div>
               <div class="content-text">各クライアントを「仕様通り」に作っていれば、ファイナリティは本当に安全と言い切れるか？</div>
             </div>
             <div>
@@ -102,16 +115,16 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">Casper FFG（投票で確定を決める仕組み）</div>
+              <div class="content-heading"><i class="fa-solid fa-check-to-slot"></i> Casper FFG（投票で確定を決める仕組み）</div>
               <div class="content-text">参加者（検証者）が投票し、全体の <strong>2/3 以上</strong>の投票が集まると「確定（Finalized）」。</div>
 
-              <div class="content-heading">違反者を特定できる安全性（Accountable Safety）</div>
+              <div class="content-heading"><i class="fa-solid fa-shield-halved"></i> 違反者を特定できる安全性（Accountable Safety）</div>
               <div class="content-text">「もし間違って2つのブロックが同時に確定しても、<strong>両方に投票した違反者を特定して資産を没収（スラッシュ）</strong>できる」という証明。</div>
 
-              <div class="content-heading">なぜ安全と言えるか（投票の重なり）</div>
+              <div class="content-heading"><i class="fa-solid fa-diagram-project"></i> なぜ安全と言えるか（投票の重なり）</div>
               <div class="content-text">2/3以上の集団が2つあれば、算術上（2/3 + 2/3 = 4/3 &gt; 1）<strong>必ず 1/3 以上が重なる</strong>。</div>
 
-              <div class="content-heading">前提条件</div>
+              <div class="content-heading"><i class="fa-solid fa-triangle-exclamation" style="color: var(--highlight-red);"></i> 前提条件</div>
               <div class="content-text">「重なった違反者が実際に検出・処罰される」という前提があって初めて安全と言える。</div>
             </div>
             <div>
@@ -133,16 +146,16 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">イーサリアムの仕様書（consensus-specs / EIP）</div>
-              <div class="content-text">英語の説明文 ＋ <strong>実際に動かせる Python テストコード</strong>で標準化。</div>
+              <div class="content-heading"><i class="fa-solid fa-file-code"></i> イーサリアムの仕様書（consensus-specs / EIP）</div>
+              <div class="content-text">英語の説明文 ＋ <strong>実際に動かせる Python テストコード <i class="devicon-python-plain colored"></i></strong>で標準化。</div>
 
-              <div class="content-heading">仕様書の役割</div>
+              <div class="content-heading"><i class="fa-solid fa-list-check"></i> 仕様書の役割</div>
               <div class="content-text">各クライアントが同じ順序で処理を行うための「手順」を定めること。</div>
 
-              <div class="content-heading">仕様書に書かれていないこと</div>
+              <div class="content-heading"><i class="fa-solid fa-file-circle-xmark"></i> 仕様書に書かれていないこと</div>
               <div class="content-text">1ステップごとの処理ロジックは詳しいが、「なぜこれで安全と言えるのか（証明が前提にしている全体ルール）」は書かれていない。</div>
 
-              <div class="content-heading">課題</div>
+              <div class="content-heading"><i class="fa-solid fa-triangle-exclamation" style="color: var(--highlight-red);"></i> 課題</div>
               <div class="content-text">仕様書だけを見て行う監査では、証明の前提条件が守られているか確認しにくい。</div>
             </div>
             <div>
@@ -164,16 +177,16 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">出発点: Lean 4 での証明</div>
+              <div class="content-heading"><i class="fa-solid fa-calculator" style="color: var(--C_PURPLE);"></i> 出発点: Lean 4 での証明</div>
               <div class="content-text">Casper FFGの安全性をLean 4で検証した17個の定理を利用。</div>
 
-              <div class="content-heading">前提条件の取り出し</div>
+              <div class="content-heading"><i class="fa-solid fa-gear"></i> 前提条件の取り出し</div>
               <div class="content-text">Leanの定理の型（引数）から「実装が満たすべき前提」をそのまま取り出す。</div>
 
-              <div class="content-heading">具体例 (CHK-GEN-09)</div>
+              <div class="content-heading"><i class="fa-solid fa-code"></i> 具体例 (CHK-GEN-09)</div>
               <div class="content-text">主定理の前提 `¬q_intersection_slashed`（重なった二重投票者が未処罰で残らないこと）を特定。</div>
 
-              <div class="content-heading">自動処理による抽出</div>
+              <div class="content-heading"><i class="fa-solid fa-robot"></i> 自動処理による抽出</div>
               <div class="content-text">LLMを使わないプログラム処理のため、嘘や勝手な前提の混入なしに <strong>延べ57件</strong> の前提を取り出した。</div>
             </div>
             <div>
@@ -195,27 +208,27 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">対象</div>
+              <div class="content-heading"><i class="fa-solid fa-folder-open"></i> 対象</div>
               <div class="content-text">仕様書 `consensus-specs` の全 89 Markdown ファイル。</div>
 
-              <div class="content-heading">判定基準</div>
+              <div class="content-heading"><i class="fa-solid fa-scale-balanced"></i> 判定基準</div>
               <div class="content-text">
                 ・<strong>明示あり（E）</strong>: 仕様書の文章に安全上の要件として書かれている<br>
                 ・<strong>明示なし（非E）</strong>: 仕様書の文章に要件として書かれていない
               </div>
 
-              <div class="content-heading">判定方法</div>
-              <div class="content-text">キーワード検索器 1 種 ＋ 6 種類の LLM（計 7 つの判定器）で自動判定。</div>
+              <div class="content-heading"><i class="fa-solid fa-magnifying-glass"></i> 判定方法</div>
+              <div class="content-text">キーワード検索器 1 種 ＋ 6 種類の LLM <i class="fa-solid fa-robot"></i>（計 7 つの判定器）で自動判定。</div>
 
-              <div class="content-heading">分析の範囲</div>
+              <div class="content-heading"><i class="fa-solid fa-chart-simple"></i> 分析の範囲</div>
               <div class="content-text">「仕様書の文章に要件として明記されているかどうか」を評価。</div>
             </div>
             <div>
               <div class="card-box">
-                <h4>照合の手順</h4>
+                <h4><i class="fa-solid fa-list-check"></i> 照合の手順</h4>
                 <p>1. Lean 4 の証明から前提条件を取り出す [57件]</p>
                 <p>2. 仕様書（89ファイル）を検索</p>
-                <p>3. 7つの判定器で「書かれている / 書かれていない」を二値判定</p>
+                <p>3. 7つの判定器で二値判定（E / 非E）</p>
                 <p>4. 結果を数値化</p>
               </div>
             </div>
@@ -232,19 +245,19 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">結果</div>
+              <div class="content-heading"><i class="fa-solid fa-chart-pie" style="color: var(--highlight-red);"></i> 結果</div>
               <div class="content-text">57件中 <strong>48件（84.2%）</strong> が7つの判定すべてで <strong>「書かれていない（非E）」</strong>。</div>
 
-              <div class="content-heading">全員一致で「書かれている」</div>
+              <div class="content-heading"><i class="fa-solid fa-circle-xmark" style="color: var(--highlight-red);"></i> 全員一致で「書かれている」</div>
               <div class="content-text">7つの判定器全員が「書かれている」とした前提条件は <strong>0件</strong>。</div>
 
-              <div class="content-heading">「関数の動き」と「全体のルール」の違い</div>
+              <div class="content-heading"><i class="fa-solid fa-code-compare"></i> 「関数の動き」と「全体のルール」の違い</div>
               <div class="content-text">
                 仕様書: `is_slashable_attestation_data`（同じエポックで2回投票したらスラッシュ処理する）<br>
                 証明の前提: `q_intersection_slashed`（重なった二重投票者が未処罰で残ることはない）
               </div>
 
-              <div class="content-heading">分かったこと</div>
+              <div class="content-heading"><i class="fa-solid fa-lightbulb"></i> 分かったこと</div>
               <div class="content-text">仕様書は手続きの指示にとどまり、安全のための前提条件が書かれていないことが数値で確認できた。</div>
             </div>
             <div>
@@ -266,20 +279,20 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">「セキュリティの話が全くない」訳ではない</div>
+              <div class="content-heading"><i class="fa-solid fa-circle-info"></i> 「セキュリティの話が全くない」訳ではない</div>
               <div class="content-text">
                 ・`weak-subjectivity.md`: スラッシングの閾値など、安全性の結果について大まかに解説している。
               </div>
 
-              <div class="content-heading">本研究で分かったこと</div>
+              <div class="content-heading"><i class="fa-solid fa-bullseye"></i> 本研究で分かったこと</div>
               <div class="content-text">大まかな解説や個別のコードはあるが、開発者や監査者がテストで確認できる<strong>「具体的な要件」</strong>の形では書かれていない。</div>
 
-              <div class="content-heading">仕様書だけを見る監査の課題</div>
+              <div class="content-heading"><i class="fa-solid fa-eye-slash"></i> 仕様書だけを見る監査の課題</div>
               <div class="content-text">大域的な前提条件が要件として書かれていないため、仕様書だけを見る監査で見落としが生じやすくなる。</div>
             </div>
             <div>
               <div class="card-box">
-                <h4>差分のポイント</h4>
+                <h4><i class="fa-solid fa-arrows-split-up-and-left"></i> 差分のポイント</h4>
                 <p style="font-size: 18px; color: var(--highlight-red); font-weight: bold; margin-bottom: 10px;">「大まかな解説」 vs 「検証できる具体要件」</p>
                 <p>手順の説明だけでは証明の前提条件が網羅されないため、監査のすり抜けが起きる可能性がある。</p>
               </div>
@@ -297,16 +310,16 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">分かったこと</div>
+              <div class="content-heading"><i class="fa-solid fa-bug" style="color: var(--highlight-red);"></i> 分かったこと</div>
               <div class="content-text">仕様書で前提が書かれていなかった「正当化・確定処理」の場所で、過去に実際のバグが起きていた。</div>
 
-              <div class="content-heading">Nimbus PR#461（チェーン分岐発生）</div>
+              <div class="content-heading"><i class="fa-solid fa-code-branch"></i> Nimbus PR#461（チェーン分岐発生）</div>
               <div class="content-text">正当化フラグの計算ミス（整数オーバーフロー）で確定の判定がズレ、実際にネットワークが分裂。</div>
 
-              <div class="content-heading">Lighthouse PR#4576（確定計算の不整合）</div>
+              <div class="content-heading"><i class="fa-solid fa-code-branch"></i> Lighthouse PR#4576（確定計算の不整合）</div>
               <div class="content-text">エポック境界の処理バグにより確定計算が食い違った。計算ロジック修正で対応。</div>
 
-              <div class="content-heading">まとめ</div>
+              <div class="content-heading"><i class="fa-solid fa-triangle-exclamation"></i> まとめ</div>
               <div class="content-text">仕様書に前提条件が書かれていない部分は、コードを書く際にバグを作り込みやすい場所と言える。</div>
             </div>
             <div>
@@ -328,13 +341,13 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">クライアントを実装する人へ</div>
+              <div class="content-heading"><i class="fa-solid fa-user-gear"></i> クライアントを実装する人へ</div>
               <div class="content-text">
                 1. <strong>仕様コードの丸写しをしない</strong>: 前提ルールが壊れていないか確認するコード（アサーション）を自前で入れておく。<br>
                 2. <strong>57個の前提リストの活用</strong>: 自動テスト（ファジング）やコード確認のチェックリストとして使う。
               </div>
 
-              <div class="content-heading">仕様書を書く人（EIP著者）へ</div>
+              <div class="content-heading"><i class="fa-solid fa-pen-nib"></i> 仕様書を書く人（EIP著者）へ</div>
               <div class="content-text">
                 1. <strong>前提条件を文章で追記する</strong>: Pythonコードだけでなく、「前提としているルール」を文章として仕様書に書く。<br>
                 2. <strong>証明（Lean/Coq）と紐づける</strong>: 証明の前提と仕様記述をリンクさせ、第三者が確認できるようにしておく。
@@ -359,24 +372,24 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">本研究の限界</div>
+              <div class="content-heading"><i class="fa-solid fa-circle-exclamation"></i> 本研究の限界</div>
               <div class="content-text">
                 ・今回の判定は自動判定（LLMなど）のみで、人手での確認はまだ行っていない。<br>
                 ・取り出した前提リストを使って実際に新しいバグを見つけられるかは未評価。
               </div>
 
-              <div class="content-heading">今後の展望 1: 再検出実験</div>
+              <div class="content-heading"><i class="fa-solid fa-flask"></i> 今後の展望 1: 再検出実験</div>
               <div class="content-text">今回作った前提リストを使って、過去のバグをどれくらい発見できるか実験する。</div>
 
-              <div class="content-heading">今後の展望 2: 人手での正解確認</div>
+              <div class="content-heading"><i class="fa-solid fa-user-check"></i> 今後の展望 2: 人手での正解確認</div>
               <div class="content-text">専門家による人手での正解ラベル確認。</div>
 
-              <div class="content-heading">今後の展望 3: 他の合意形成への応用</div>
+              <div class="content-heading"><i class="fa-solid fa-diagram-successor"></i> 今後の展望 3: 他の合意形成への応用</div>
               <div class="content-text">TendermintやHotStuffなど、他のプロトコルにも広げる。</div>
             </div>
             <div>
               <div class="card-box">
-                <h4>今後の進め方</h4>
+                <h4><i class="fa-solid fa-compass"></i> 今後の進め方</h4>
                 <p>・実際のバグ発見能力の検証</p>
                 <p>・専門家による判定結果の確認</p>
                 <p>・他のブロックチェーン合意形成への応用</p>
@@ -395,21 +408,21 @@
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading">仕様どおり＝安全 とは言いきれない</div>
+              <div class="content-heading"><i class="fa-solid fa-shield-xmark" style="color: var(--highlight-red);"></i> 仕様どおり＝安全 とは言いきれない</div>
               <div class="content-text">手順を守るだけでは、証明が前提にしているルールまでカバーされない。</div>
 
-              <div class="content-heading">前提条件の見える化</div>
+              <div class="content-heading"><i class="fa-solid fa-eye"></i> 前提条件の見える化</div>
               <div class="content-text">Lean 4の証明から57個の前提を取り出すと、<strong>84.2%（48個）が仕様書に未記載</strong>だった。</div>
 
-              <div class="content-heading">実務への貢献</div>
+              <div class="content-heading"><i class="fa-solid fa-handshake-angle"></i> 実務への貢献</div>
               <div class="content-text">前提が書かれていない場所と過去のバグ発生場所の重なりを示し、<strong>実装者と仕様執筆者への具体的な提案</strong>をまとめた。</div>
 
-              <div class="content-heading">成果物の公開</div>
+              <div class="content-heading"><i class="fa-solid fa-folder-open"></i> 成果物の公開</div>
               <div class="content-text">再現用データ・57個の前提条件一覧を固定コミットで公開中。</div>
             </div>
             <div>
               <div class="card-box" style="background: #eff6ff; border-color: #93c5fd;">
-                <h4 style="color: #1d4ed8;">ご清聴ありがとうございました</h4>
+                <h4 style="color: #1d4ed8;"><i class="fa-solid fa-heart"></i> ご清聴ありがとうございました</h4>
                 <p style="font-size: 15px; color: #1e3a8a; margin-top: 10px;">愛知総合工科高校 / Nyx Foundation / Independent Researcher</p>
               </div>
             </div>

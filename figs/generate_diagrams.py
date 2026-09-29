@@ -12,7 +12,9 @@ def get_font(size, bold=False):
     except Exception:
         return ImageFont.load_default()
 
+F12 = get_font(12)
 F14 = get_font(14)
+F14B = get_font(14, bold=True)
 F16 = get_font(16)
 F16B = get_font(16, bold=True)
 F18 = get_font(18)
@@ -30,13 +32,49 @@ C_BORDER = (203, 213, 225)
 C_RED = (220, 38, 38)
 C_GREEN = (22, 163, 74)
 C_ORANGE = (234, 88, 12)
+C_PURPLE = (147, 51, 234)
 C_WHITE = (255, 255, 255)
 C_DARKGRAY = (51, 65, 85)
+
+# Brand colors
+COLOR_GO = (0, 172, 215)
+COLOR_RUST = (222, 74, 18)
+COLOR_JAVA = (229, 44, 47)
+COLOR_CSHARP = (155, 79, 150)
+COLOR_TS = (49, 120, 198)
+COLOR_NIM = (255, 194, 0)
+COLOR_PYTHON = (55, 118, 171)
+COLOR_ETH = (98, 126, 234)
+C_ETH = COLOR_ETH
 
 def save(im, name):
     path = os.path.join(OUT, name)
     im.save(path)
     print(f"Saved: {name} ({os.path.getsize(path)} bytes)")
+
+def draw_eth_logo(d, cx, cy, size=24):
+    # Draw Ethereum diamond logo
+    w = size // 2
+    h = size
+    points_top = [(cx, cy - h//2), (cx + w, cy), (cx, cy + h//6), (cx - w, cy)]
+    points_bottom = [(cx, cy + h//6), (cx + w, cy), (cx, cy + h//2), (cx - w, cy)]
+    d.polygon(points_top, fill=COLOR_ETH, outline=C_NAVY)
+    d.polygon(points_bottom, fill=(60, 80, 180), outline=C_NAVY)
+
+def draw_lang_badge(d, x, y, lang):
+    badge_colors = {
+        "Go": (COLOR_GO, "GO"),
+        "Rust": (COLOR_RUST, "RUST"),
+        "Java": (COLOR_JAVA, "JAVA"),
+        "C#": (COLOR_CSHARP, "C#"),
+        "TypeScript": (COLOR_TS, "TS"),
+        "Nim": (COLOR_NIM, "NIM"),
+        "Python": (COLOR_PYTHON, "PY"),
+    }
+    bg, label = badge_colors.get(lang, (C_GRAY, lang[:2].upper()))
+    text_color = C_WHITE if lang != "Nim" else C_NAVY
+    d.rounded_rectangle([x, y, x + 44, y + 20], radius=4, fill=bg)
+    d.text((x + 6, y + 2), label, fill=text_color, font=F12)
 
 # -------------------------------------------------------------
 # FIG 2: S2 Ethereum Multi-Client Architecture
@@ -46,14 +84,15 @@ def make_fig_s2():
     im = Image.new("RGB", (w, h), C_WHITE)
     d = ImageDraw.Draw(im)
 
-    # Title card: Specification
-    d.rounded_rectangle([20, 170, 170, 270], radius=10, fill=C_BLUE, outline=C_BLUE)
-    d.text((35, 195), "イーサリアム", fill=C_WHITE, font=F18B)
-    d.text((35, 225), "共通の仕様書", fill=C_WHITE, font=F16B)
+    # Title card: Specification with Ethereum Logo
+    d.rounded_rectangle([20, 160, 170, 280], radius=10, fill=C_LBLUE, outline=COLOR_ETH, width=3)
+    draw_eth_logo(d, 95, 195, size=32)
+    d.text((40, 220), "イーサリアム", fill=C_NAVY, font=F16B)
+    d.text((45, 248), "共通の仕様書", fill=C_BLUE, font=F14B)
 
     # Execution Clients Section
-    d.rounded_rectangle([230, 20, 650, 210], radius=8, fill=C_LGRAY, outline=C_BORDER)
-    d.text((245, 30), "実行層（Execution）のソフト", fill=C_NAVY, font=F16B)
+    d.rounded_rectangle([210, 15, 660, 210], radius=8, fill=C_LGRAY, outline=C_BORDER)
+    d.text((225, 25), "実行層（Execution）のソフト", fill=C_NAVY, font=F16B)
     
     el_clients = [
         ("Geth", "Go"),
@@ -65,15 +104,15 @@ def make_fig_s2():
     for i, (name, lang) in enumerate(el_clients):
         col = i % 3
         row = i // 3
-        x = 245 + col * 130
-        y = 65 + row * 65
-        d.rounded_rectangle([x, y, x + 120, y + 55], radius=6, fill=C_WHITE, outline=C_BLUE, width=2)
-        d.text((x + 10, y + 8), name, fill=C_NAVY, font=F16B)
-        d.text((x + 10, y + 30), f"言語: {lang}", fill=C_GRAY, font=F14)
+        x = 225 + col * 140
+        y = 60 + row * 68
+        d.rounded_rectangle([x, y, x + 130, y + 58], radius=6, fill=C_WHITE, outline=C_BLUE, width=2)
+        d.text((x + 8, y + 8), name, fill=C_NAVY, font=F16B)
+        draw_lang_badge(d, x + 8, y + 32, lang)
 
     # Consensus Clients Section
-    d.rounded_rectangle([230, 230, 650, 420], radius=8, fill=C_LBLUE, outline=C_BLUE)
-    d.text((245, 240), "合意層（Consensus）のソフト（本研究の対象）", fill=C_NAVY, font=F16B)
+    d.rounded_rectangle([210, 225, 660, 425], radius=8, fill=C_LBLUE, outline=C_BLUE)
+    d.text((225, 235), "合意層（Consensus）のソフト（本研究の対象）", fill=C_NAVY, font=F16B)
     
     cl_clients = [
         ("Prysm", "Go"),
@@ -85,15 +124,15 @@ def make_fig_s2():
     for i, (name, lang) in enumerate(cl_clients):
         col = i % 3
         row = i // 3
-        x = 245 + col * 130
-        y = 275 + row * 65
-        d.rounded_rectangle([x, y, x + 120, y + 55], radius=6, fill=C_WHITE, outline=C_RED, width=2)
-        d.text((x + 10, y + 8), name, fill=C_NAVY, font=F16B)
-        d.text((x + 10, y + 30), f"言語: {lang}", fill=C_GRAY, font=F14)
+        x = 225 + col * 140
+        y = 270 + row * 68
+        d.rounded_rectangle([x, y, x + 130, y + 58], radius=6, fill=C_WHITE, outline=C_RED, width=2)
+        d.text((x + 8, y + 8), name, fill=C_NAVY, font=F16B)
+        draw_lang_badge(d, x + 8, y + 32, lang)
 
     # Connecting arrows
-    d.line([170, 220, 230, 115], fill=C_BLUE, width=3)
-    d.line([170, 220, 230, 325], fill=C_BLUE, width=3)
+    d.line([170, 220, 210, 110], fill=C_BLUE, width=3)
+    d.line([170, 220, 210, 325], fill=C_BLUE, width=3)
 
     save(im, "fig_s2_clients.png")
 
@@ -142,14 +181,16 @@ def make_fig_s4():
 
     # Upper panel: Prose specification
     d.rounded_rectangle([20, 50, 660, 160], radius=8, fill=C_LGRAY, outline=C_BORDER)
-    d.text((35, 60), "1. 英語の説明文（文章での手順解説）", fill=C_NAVY, font=F16B)
-    d.text((35, 90), "「検証者の投票を集計し、全体の 2/3 以上の同意が得られたら", fill=C_DARKGRAY, font=F14)
-    d.text((35, 115), "  該当チェックポイントを確定（Finalized）処理する。」", fill=C_DARKGRAY, font=F14)
-    d.text((35, 138), "※ 特徴: 処理の手順は書いてあるが「安全のための全体ルール」は書かれない", fill=C_RED, font=F14)
+    draw_eth_logo(d, 40, 75, size=24)
+    d.text((60, 62), "1. 英語の説明文（文章での手順解説 - EIP仕様書）", fill=C_NAVY, font=F16B)
+    d.text((35, 95), "「検証者の投票を集計し、全体の 2/3 以上の同意が得られたら", fill=C_DARKGRAY, font=F14)
+    d.text((35, 118), "  該当チェックポイントを確定（Finalized）処理する。」", fill=C_DARKGRAY, font=F14)
+    d.text((35, 140), "※ 特徴: 処理の手順は書いてあるが「安全のための全体ルール」は書かれない", fill=C_RED, font=F14)
 
     # Lower panel: Python Executable Spec Code
     d.rounded_rectangle([20, 180, 660, 420], radius=8, fill=C_NAVY, outline=C_NAVY)
-    d.text((35, 192), "2. 実行できる Python テストコード", fill=C_LBLUE, font=F16B)
+    draw_lang_badge(d, 35, 192, "Python")
+    d.text((90, 192), "2. 実行できる Python テストコード（Executable Spec）", fill=C_LBLUE, font=F16B)
     
     code_lines = [
         "def process_justification_and_finalization(state: BeaconState) -> None:",
@@ -168,9 +209,9 @@ def make_fig_s4():
         if "#" in line:
             color = C_GRAY
         if "matching_target_balance * 3" in line:
-            color = (253, 224, 71) # Yellow highlight
+            color = (253, 224, 71)
         if "※" in line:
-            color = (252, 165, 165) # Red highlight
+            color = (252, 165, 165)
         d.text((35, 225 + i * 19), line, fill=color, font=F14)
 
     save(im, "fig_s4_eip_spec.png")
@@ -186,8 +227,10 @@ def make_fig_s5():
     d.text((20, 15), "証明からの前提取り出しと仕様書の確認（例: CHK-GEN-09）", fill=C_NAVY, font=F18B)
 
     # Left: Lean 4 Formalization
-    d.rounded_rectangle([20, 55, 325, 415], radius=8, fill=C_LBLUE, outline=C_BLUE, width=2)
-    d.text((35, 65), "Lean 4 の証明（定理）", fill=C_BLUE, font=F16B)
+    d.rounded_rectangle([20, 55, 325, 415], radius=8, fill=C_LBLUE, outline=C_PURPLE, width=2)
+    d.rounded_rectangle([30, 63, 100, 83], radius=4, fill=C_PURPLE)
+    d.text((36, 65), "LEAN 4", fill=C_WHITE, font=F12)
+    d.text((110, 65), "形式証明（定理）", fill=C_PURPLE, font=F16B)
     d.text((35, 90), "theorem no_k_finalized_...", fill=C_NAVY, font=F14)
     
     d.rounded_rectangle([30, 115, 315, 230], radius=6, fill=C_WHITE, outline=C_RED, width=2)
@@ -292,7 +335,8 @@ def make_fig_s9():
     # Concrete Bug 1: Nimbus PR#461
     d.rounded_rectangle([20, 140, 330, 420], radius=8, fill=C_WHITE, outline=C_BLUE, width=2)
     d.rounded_rectangle([20, 140, 330, 180], radius=8, fill=C_BLUE, outline=C_BLUE)
-    d.text((35, 150), "実際のバグ例 1: Nimbus PR#461", fill=C_WHITE, font=F16B)
+    draw_lang_badge(d, 30, 150, "Nim")
+    d.text((80, 150), "Nimbus PR#461", fill=C_WHITE, font=F16B)
     
     d.text((35, 195), "■ 障害: チェーン分岐（Chain Split）", fill=C_RED, font=F14)
     d.text((35, 220), "■ 原因: 正当化ビットの処理", fill=C_NAVY, font=F14)
@@ -306,7 +350,8 @@ def make_fig_s9():
     # Concrete Bug 2: Lighthouse PR#4576
     d.rounded_rectangle([350, 140, 660, 420], radius=8, fill=C_WHITE, outline=C_BLUE, width=2)
     d.rounded_rectangle([350, 140, 660, 180], radius=8, fill=C_BLUE, outline=C_BLUE)
-    d.text((365, 150), "実際のバグ例 2: Lighthouse PR#4576", fill=C_WHITE, font=F16B)
+    draw_lang_badge(d, 360, 150, "Rust")
+    d.text((410, 150), "Lighthouse PR#4576", fill=C_WHITE, font=F16B)
     
     d.text((365, 195), "■ 障害: 確定計算の不整合", fill=C_RED, font=F14)
     d.text((365, 220), "■ 原因: エポック境界の集計", fill=C_NAVY, font=F14)
