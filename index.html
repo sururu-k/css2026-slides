@@ -94,7 +94,7 @@
 
             <div class="key-message-box">
               <h4><i class="fa-solid fa-bullseye"></i> 本日の結論</h4>
-              <p>「お手本コードの丸写しは危険！証明の『隠れた全体ルール』を自動停止装置（アサーション）で確認しよう」</p>
+              <p>「仕様書の実装例を丸写しするのは危険！証明が前提にしている『隠れた全体ルール』を自動テスト（アサーション）で確認しよう」</p>
             </div>
 
             <div style="font-size: 20px; color: var(--text-sub); font-weight: bold; margin-top: 35px; border-top: 2px solid #cbd5e1; padding-top: 20px;">
@@ -119,7 +119,7 @@
 
             <div class="card" style="border-left: 8px solid var(--corporate-blue);">
               <h4><i class="fa-solid fa-diagram-project"></i> 2. 分散システム・プロトコル設計者へ（Web3・一般共通）</h4>
-              <p>仕様を移植する際のバグを防ぐ <strong>「自動停止メカニズムによる安全設計指針」を獲得できる！</strong></p>
+              <p>仕様を移植する際のバグを防ぐ <strong>「自動テストによる安全設計指針」を獲得できる！</strong></p>
             </div>
 
             <div class="card" style="border-left: 8px solid var(--highlight-red);">
@@ -175,7 +175,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 5: Plain Explanation: Why 2/3 Voting is Safe (REWRITTEN) -->
+      <!-- SLIDE 5: Plain Explanation -->
       <section>
         <div class="standard-header">
           <h2>なぜ 2/3 の投票で安全と言えるのか？</h2>
@@ -208,7 +208,7 @@
           <div class="two-col-grid">
             <div>
               <div class="content-heading"><i class="fa-solid fa-file-code"></i> 仕様書の中身</div>
-              <div class="content-text">英語の説明文章 ＋ 実際に動かせる <strong>Python のお手本コード</strong>。</div>
+              <div class="content-text">英語の説明文章 ＋ 実際に動かせる <strong>Python の実装例（テストコード）</strong>。</div>
 
               <div class="content-heading"><i class="fa-solid fa-circle-xmark" style="color: var(--highlight-red);"></i> 仕様書の限界</div>
               <div class="content-text">
@@ -229,21 +229,18 @@
       <!-- SLIDE 7: Assertion Concept -->
       <section>
         <div class="standard-header">
-          <h2>対策の鍵：「自動停止安全装置（アサーション）」とは</h2>
+          <h2>対策の鍵：自動テストコードでのチェック（アサーション）とは</h2>
           <span class="header-meta">用語解説</span>
         </div>
         <div class="slide-body">
           <div class="single-col">
             <div class="card" style="border-left: 8px solid var(--corporate-blue);">
-              <h4><i class="fa-solid fa-shield-cat"></i> 自動停止安全装置（アサーション）とは</h4>
-              <p style="font-size: 24px; font-weight: bold; color: var(--text-main);">「この時点で絶対にこのルールが成り立っていなければおかしい」という前提を自動チェックし、違反があれば即座に安全停止させる仕掛け</p>
+              <h4><i class="fa-solid fa-shield-cat"></i> 自動テストでのチェック（アサーション: Assertion）</h4>
+              <p style="font-size: 24px; font-weight: bold; color: var(--text-main);">テスト実行中やプログラム内で「この時点で絶対にこのルールが成り立っていなければおかしい」という前提条件を検証するコード</p>
             </div>
 
-            <div class="content-heading"><i class="fa-solid fa-plane-triangle-exclamation"></i> 身近な例え</div>
-            <div class="content-text">飛行機の「高度がマイナスになったら即座に自動停止ブレーキを引く」メカニズム。</div>
-
-            <div class="content-heading"><i class="fa-solid fa-triangle-exclamation" style="color: var(--highlight-red);"></i> 必要な対策</div>
-            <div class="content-text">仕様書のお手本コードにない前提確認チェックを、自分のコード内に自前で仕込むこと！</div>
+            <div class="content-heading"><i class="fa-solid fa-bullseye"></i> 役割</div>
+            <div class="content-text">仕様書の実装例にはない前提確認チェックを、開発者が自前のコードやテストケースに仕込むこと！</div>
           </div>
         </div>
       </section>
@@ -325,7 +322,7 @@
             <div class="card" style="border-top: 6px solid var(--highlight-red);">
               <h4 style="color: var(--highlight-red); font-size: 28px;"><i class="fa-solid fa-bug"></i> Nimbus PR#461（チェーン分裂）</h4>
               <p style="margin-bottom: 12px;"><strong>障害</strong>: 計算ミスにより確定の判定がズレ、ネットワークが実際に 2 つに分裂！</p>
-              <p style="color: var(--highlight-green); font-weight: bold;"><strong>修正</strong>: ビット計算の自動停止チェック（アサーション）を追加。</p>
+              <p style="color: var(--highlight-green); font-weight: bold;"><strong>修正</strong>: ビット計算のチェックコード（アサーション）を追加。</p>
             </div>
 
             <div class="card" style="border-top: 6px solid var(--corporate-blue);">
@@ -374,7 +371,7 @@
               <h4 style="color: var(--highlight-green); font-size: 24px;"><i class="fa-solid fa-check-double"></i> 冒頭スライド（<a href="#/1" style="color: var(--corporate-blue); text-decoration: underline;">/#/1</a>）のおさらい・伏線回収</h4>
               <p style="font-size: 20px; line-height: 1.5; color: var(--text-main);">
                 ・<strong>研究者・監査員へ</strong>: 本アプローチと 57 前提リストは、あらゆるプロトコル仕様の穴を突く <strong>「漏れのない検証ツール」</strong> になる！<br>
-                ・<strong>設計者・エンジニアへ</strong>: お手本コードの丸写しを防ぎ前提を監視する自動停止装置は、**「普遍的な安全設計指針」** になる！
+                ・<strong>設計者・エンジニアへ</strong>: 実装例の丸写しを防ぎ前提を監視する自動テストは、**「普遍的な安全設計指針」** になる！
               </p>
             </div>
 
