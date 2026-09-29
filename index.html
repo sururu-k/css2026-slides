@@ -104,8 +104,8 @@
         </div>
       </section>
 
-      <!-- SLIDE 2: CSS2026 Audience Benefits (Generalized for Software & Security) -->
-      <section>
+      <!-- SLIDE 2: CSS2026 Audience Benefits (Foreshadowing) -->
+      <section id="slide-benefits">
         <div class="standard-header">
           <h2>CSS2026参加者が得られる最大利益</h2>
           <span class="header-meta">汎用セキュリティへの発展</span>
@@ -337,43 +337,50 @@
         </div>
       </section>
 
-      <!-- SLIDE 11: General Security Application -->
+      <!-- SLIDE 11: Foreshadowing Recovery Slide -->
       <section>
         <div class="standard-header">
-          <h2>明日から使える提案（あらゆる分散プロトコルへ）</h2>
-          <span class="header-meta">セキュリティ現場への提案</span>
+          <h2>伏線回収：それって Web3（ブロックチェーン）だけの話？</h2>
+          <span class="header-meta">本質的考察</span>
         </div>
         <div class="slide-body">
-          <div class="two-col-grid">
-            <div class="card" style="border-left: 8px solid var(--corporate-blue);">
-              <h4><i class="fa-solid fa-diagram-project"></i> 1. プロトコル設計者・分散システム開発者へ（Web3＆一般共通）</h4>
-              <p>仕様アルゴリズムの他言語移植時に、モデル暗黙前提の破綻を防ぐ <strong>「自前アサーション自動防衛指針」</strong> を獲得できる！</p>
+          <div class="single-col">
+            <div class="card" style="border-left: 8px solid var(--highlight-purple); background: #faf5ff;">
+              <h4 style="color: var(--highlight-purple); font-size: 26px;"><i class="fa-solid fa-circle-question"></i> なぜ Web3（イーサリアム）だったのか？</h4>
+              <p style="font-size: 22px; color: var(--text-main);">
+                「公式ソフトがなく仕様書から多様な言語に丸写し移植される」という極限環境だったため、<strong>最初にバグ障害として表面化した</strong>。
+              </p>
             </div>
 
-            <div class="card" style="border-left: 8px solid var(--highlight-purple);">
-              <h4><i class="fa-solid fa-flask"></i> 2. 形式手法・セキュリティ解析研究者へ</h4>
-              <p>証明から前提を取り出し仕様・コードの乖離を特定する <strong>「漏れのないセキュリティ検証フレームワーク」</strong> を他分野へ応用可能！</p>
+            <div class="card" style="border-left: 8px solid var(--corporate-blue);">
+              <h4 style="font-size: 26px;"><i class="fa-solid fa-network-wired"></i> 本質：あらゆる分散システム・プロトコル共通の課題</h4>
+              <p style="font-size: 22px; color: var(--text-main);">
+                仕様移植時に暗黙前提が壊れてバグになる問題は、<strong>Raft / Paxos / 金融決済 / OS / ネットワークプロトコル全般の普遍的リスク！</strong>
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SLIDE 12: Conclusion -->
+      <!-- SLIDE 12: Conclusion & Review of Benefits -->
       <section>
         <div class="standard-header">
-          <h2>まとめ</h2>
-          <span class="header-meta">まとめ</span>
+          <h2>冒頭のおさらいと結論</h2>
+          <span class="header-meta">伏線回収・まとめ</span>
         </div>
         <div class="slide-body">
           <div class="single-col">
-            <div class="content-heading"><i class="fa-solid fa-shield-xmark" style="color: var(--highlight-red);"></i> 仕様どおり＝安全 とは言えない</div>
-            <div class="content-text">手順を守るだけでは、証明が前提にしている大域的な安全ルールまでカバーされない。</div>
+            <div class="card" style="border-left: 8px solid var(--highlight-green); padding: 22px;">
+              <h4 style="color: var(--highlight-green); font-size: 24px;"><i class="fa-solid fa-check-double"></i> 冒頭スライド（<a href="#/1" style="color: var(--corporate-blue); text-decoration: underline;">/#/1</a>）の伏線回収・理由</h4>
+              <p style="font-size: 20px; line-height: 1.5; color: var(--text-main);">
+                ・<strong>研究者・監査員へ</strong>: 証明からの前提抽出手法と57前提リストは、あらゆるプロトコル仕様の穴を突く <strong>「漏れのない検証ツール」</strong> になる！<br>
+                ・<strong>設計者・開発者へ</strong>: 仕様丸写しを防ぐ自前アサーションは、次世代分散システムの <strong>「普遍的な安全設計指針」</strong> になる！
+              </p>
+            </div>
 
-            <div class="content-heading"><i class="fa-solid fa-eye"></i> 前提の可視化</div>
-            <div class="content-text">Lean 4 の証明から 57 個の前提を取り出すと **84.2% が仕様書に未記載**。</div>
-
-            <div class="card" style="background: #eff6ff; border-color: #93c5fd; text-align: center; padding: 30px; margin-top: 30px;">
-              <h4 style="color: #1d4ed8; justify-content: center; font-size: 34px;"><i class="fa-solid fa-heart"></i> ご清聴ありがとうございました</h4>
+            <div class="card" style="background: #eff6ff; border-color: #93c5fd; text-align: center; padding: 25px; margin-top: 15px;">
+              <h4 style="color: #1d4ed8; justify-content: center; font-size: 32px; margin-bottom: 8px;"><i class="fa-solid fa-heart"></i> ご清聴ありがとうございました</h4>
+              <p style="font-size: 20px; color: #1e3a8a; font-weight: bold; margin: 0;">「仕様どおり＝安全」の時代は終わった。</p>
             </div>
           </div>
         </div>
