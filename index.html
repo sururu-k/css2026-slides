@@ -35,11 +35,11 @@
     .media-box { width: 100%; height: auto; border: 1px solid var(--border-gray); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
     .media-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
     .simple-caption { font-size: 13px; color: var(--text-sub); text-align: center; margin-top: 6px; }
-    .cover-body { height: 100%; padding: 50px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; box-sizing: border-box; }
-    .cover-title { font-size: 36px !important; font-weight: bold !important; color: var(--text-main) !important; line-height: 1.35 !important; margin-top: 15px !important; margin-bottom: 30px !important; }
+    .cover-body { height: 100%; padding: 40px 50px; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 30px; align-items: center; box-sizing: border-box; }
+    .cover-title { font-size: 34px !important; font-weight: bold !important; color: var(--text-main) !important; line-height: 1.3 !important; margin-top: 10px !important; margin-bottom: 18px !important; }
     .cover-media { height: 440px; border: 1px solid var(--border-gray); border-radius: 8px; overflow: hidden; }
     .cover-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .tag-blue { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 14px; font-weight: bold; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; }
+    .tag-blue { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 14px; font-weight: bold; padding: 4px 10px; border-radius: 4px; margin-bottom: 6px; }
     .card-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 14px; }
     .card-box h4 { margin: 0 0 8px 0; color: var(--corporate-blue); font-size: 18px; display: flex; align-items: center; gap: 8px; }
     .card-box p { margin: 0; font-size: 15px; color: #334155; line-height: 1.5; }
@@ -49,23 +49,35 @@
     .three-card-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; height: 100%; align-items: stretch; }
     .card-column { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; }
     .card-column h3 { font-size: 18px; margin-top: 0; margin-bottom: 12px; color: var(--corporate-blue); border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-    .code-block-preview { background: #0f172a; color: #f8fafc; font-family: monospace; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.4; overflow-x: auto; }
+    .key-message-box { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 14px 18px; margin-top: 15px; }
+    .key-message-box h4 { margin: 0 0 6px 0; color: #1d4ed8; font-size: 16px; font-weight: bold; }
+    .key-message-box p { margin: 0; font-size: 15px; color: #1e3a8a; font-weight: bold; line-height: 1.4; }
   </style>
 </head>
 <body>
   <div class="reveal">
     <div class="slides">
 
-      <!-- SLIDE 1: Title -->
+      <!-- SLIDE 1: Title & Key Takeaway / Agenda -->
       <section>
         <div class="cover-body">
           <div class="cover-content">
             <div>
               <span class="tag-blue"><i class="fa-brands fa-ethereum"></i> CSS2026 発表資料</span>
-              <h1 class="cover-title">仕様どおりに実装すれば安全か<br><span style="font-size: 24px; color: var(--text-sub); font-weight: normal;">— イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</span></h1>
+              <h1 class="cover-title">仕様どおりに実装すれば安全か<br><span style="font-size: 22px; color: var(--text-sub); font-weight: normal;">— イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</span></h1>
             </div>
-            <div style="font-size: 17px; color: var(--text-main); font-weight: bold; border-top: 2px solid var(--corporate-blue); padding-top: 20px;">
-              村上 大岳（愛知総合工科高校）／ 神波 真聖・柳浜 万里（Nyx Foundation）<br>釘宮 由成（Independent Researcher）
+
+            <div class="key-message-box">
+              <h4><i class="fa-solid fa-bullseye"></i> 一番言いたいこと（結論）</h4>
+              <p>「仕様コードの丸写しは危険！証明が依拠する『隠れた全体前提』をアサーション等で確認しよう」</p>
+            </div>
+
+            <div style="font-size: 14px; color: var(--text-main); margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+              <strong>発表の流れ:</strong> ①前提（多実装環境・安全性の仕組み） $\rightarrow$ ②何をするか（Lean 4での前提抽出） $\rightarrow$ ③結果・現場提案
+            </div>
+
+            <div style="font-size: 15px; color: var(--text-sub); font-weight: bold; margin-top: 12px;">
+              村上 大岳（愛知総合工科高校）／ 神波 真聖・柳浜 万里（Nyx）／ 釘宮 由成
             </div>
           </div>
           <div class="cover-media">
@@ -77,18 +89,18 @@
       <!-- SLIDE 2: Multi-implementation -->
       <section>
         <div class="standard-header">
-          <h2>イーサリアムとは何か？〜公式ソフトのない「多実装環境」〜</h2>
-          <span class="header-meta">背景・基本概念</span>
+          <h2>前提知識：イーサリアムとは？〜公式ソフトのない「多実装環境」〜</h2>
+          <span class="header-meta">前提知識・背景</span>
         </div>
         <div class="slide-body">
           <div class="two-column">
             <div>
               <div class="content-heading"><i class="fa-brands fa-ethereum" style="color: #627eea;"></i> イーサリアムとは</div>
-              <div class="content-text">分散型のブロックチェーンプラットフォーム。</div>
+              <div class="content-text">分散型のスマートコントラクト・プラットフォーム。</div>
 
-              <div class="content-heading"><i class="fa-solid fa-network-wired"></i> なぜ「公式ソフト」が存在しないのか</div>
+              <div class="content-heading"><i class="fa-solid fa-network-wired"></i> 前提：「公式ソフト」が存在しない</div>
               <div class="content-text">
-                単一障害点（1つのソフトのバグで全停止）を防ぐため。共通の仕様書のもと、多様な言語で開発・運用。<br>
+                単一障害点（1つのバグで全停止）を防ぐため、共通仕様書をもとに多様な言語でソフト（クライアント）を開発・運用。<br>
                 <span class="badge-icon"><i class="devicon-go-original colored"></i> Go</span>
                 <span class="badge-icon"><i class="devicon-rust-plain colored"></i> Rust</span>
                 <span class="badge-icon"><i class="devicon-java-plain colored"></i> Java</span>
@@ -97,7 +109,7 @@
               </div>
 
               <div class="content-heading"><i class="fa-solid fa-lock"></i> ファイナリティ（Finality）とは</div>
-              <div class="content-text">「一度確定した取引は絶対に覆らない」という性質。崩れると<strong>確定した取引が消えて二重支払いが起きる</strong>。</div>
+              <div class="content-text">「一度確定した取引は絶対に覆らない」という保証（崩れると確定した送金が消えて二重支払いが起きる）。</div>
 
               <div class="content-heading"><i class="fa-solid fa-circle-question"></i> 本研究の問い</div>
               <div class="content-text">各チームが仕様書どおりにクライアントを作っていれば、ファイナリティは本当に安全と言えるか？</div>
@@ -112,10 +124,10 @@
         </div>
       </section>
 
-      <!-- SLIDE 3: Casper FFG & Safety Theorem -->
+      <!-- SLIDE 3: Safety Theorem & Hidden Assumptions -->
       <section>
         <div class="standard-header">
-          <h2>安全性の定理と「なぜ安全と言えるのか」</h2>
+          <h2>安全性の仕組みと「見落とされがちな前提条件」</h2>
           <span class="header-meta">違反者を特定できる安全性</span>
         </div>
         <div class="slide-body">
@@ -130,7 +142,7 @@
               <div class="content-heading"><i class="fa-solid fa-diagram-project"></i> なぜ安全と言えるか（算術的な重なり）</div>
               <div class="content-text">2/3以上の集団が2つあれば、算術上（2/3 + 2/3 = 4/3 &gt; 1）<strong>必ず 1/3 以上が重なる（二重投票者）</strong>。</div>
 
-              <div class="content-heading"><i class="fa-solid fa-triangle-exclamation" style="color: var(--highlight-red);"></i> 前提条件（Assumption）</div>
+              <div class="content-heading"><i class="fa-solid fa-triangle-exclamation" style="color: var(--highlight-red);"></i> 見落とされがちな「前提条件（Assumption）」</div>
               <div class="content-text">「重なった違反者が実際にシステムで検出・処罰される」という前提があって初めて保証される。</div>
             </div>
             <div>
@@ -174,16 +186,16 @@
         </div>
       </section>
 
-      <!-- SLIDE 5: Formal Proof Extraction -->
+      <!-- SLIDE 5: What We Do / Formal Proof Extraction -->
       <section>
         <div class="standard-header">
-          <h2>形式証明からの前提条件（Assumption）抽出</h2>
+          <h2>何をするか：形式証明からの前提条件抽出</h2>
           <span class="header-meta">Lean 4 による自動抽出</span>
         </div>
         <div class="slide-body">
           <div class="two-column">
             <div>
-              <div class="content-heading"><i class="fa-solid fa-calculator" style="color: var(--C_PURPLE);"></i> 出発点: Lean 4 での形式証明</div>
+              <div class="content-heading"><i class="fa-solid fa-calculator" style="color: var(--C_PURPLE);"></i> アプローチ: Lean 4 での形式証明</div>
               <div class="content-text">Casper FFGの安全性をLean 4で検証した17個の定理を利用。</div>
 
               <div class="content-heading"><i class="fa-solid fa-gear"></i> 前提条件の機械的取り出し</div>
@@ -231,7 +243,7 @@
               <h3><i class="fa-solid fa-magnifying-glass"></i> 7つの判定器</h3>
               <p style="font-size: 14px; color: #334155; line-height: 1.6;">
                 ・キーワード検索器 (1種)<br>
-                ・LLM によるクロス検証 (6種)<br><br>
+                ・LLM によるクロス検証 (6种)<br><br>
                 <em>仕様書から安全前提を読み取れるかを客観評価</em>
               </p>
             </div>
@@ -395,7 +407,7 @@
                 <h4><i class="fa-solid fa-compass"></i> 今後の進め方</h4>
                 <p>・実際のバグ発見能力の検証</p>
                 <p>・専門家による判定結果の確認</p>
-                <p>・他のブロックチェーン合ive合意形成への応用</p>
+                <p>・他のブロックチェーン合意形成への応用</p>
               </div>
             </div>
           </div>
