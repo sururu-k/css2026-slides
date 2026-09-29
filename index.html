@@ -104,28 +104,54 @@
         </div>
       </section>
 
-      <!-- SLIDE 2: Core Question -->
+      <!-- SLIDE 2: Benefits Slide (NEW explicit slide) -->
       <section>
         <div class="standard-header">
-          <h2>本日の問い</h2>
-          <span class="header-meta">問題意識</span>
+          <h2>この発表を聞くメリット（あなたが得られる情報・ツール）</h2>
+          <span class="header-meta">Benefits &amp; Takeaways</span>
         </div>
         <div class="slide-body">
           <div class="single-col">
-            <div class="card" style="border-left: 8px solid var(--highlight-red); padding: 35px; text-align: center; margin-bottom: 30px;">
-              <h3 style="font-size: 36px; color: var(--highlight-red); margin: 0 0 15px 0;"><i class="fa-solid fa-circle-question"></i> 核心の問い</h3>
-              <p style="font-size: 28px; font-weight: bold; color: var(--text-main); margin: 0;">「各クライアントを仕様書通りに作っていれば、本当に安全と言い切れるのか？」</p>
+            <div class="card" style="border-left: 8px solid var(--corporate-blue);">
+              <h4><i class="fa-solid fa-user-gear"></i> 1. クライアント開発者へ</h4>
+              <p>仕様コード丸写しの危険性を理解でき、本研究が抽出した <strong>「57 件の前提条件リスト」を自動テスト（ファジング）にそのまま活用できる！</strong></p>
             </div>
 
-            <div class="content-heading"><i class="fa-solid fa-network-wired"></i> 背景：イーサリアムの「多実装環境」</div>
-            <div class="content-text">
-              単一の公式ソフトが存在せず、世界中の独立チームが Go, Rust, Java など多様な言語で開発・運用。
+            <div class="card" style="border-left: 8px solid var(--highlight-red);">
+              <h4><i class="fa-solid fa-shield-halved"></i> 2. セキュリティ監査員へ</h4>
+              <p>従来の「仕様書通りのコードか見るだけの監査」の穴に気づき、<strong>証明の前提に基づいた「漏れのないピンポイント監査手法」が手に入る！</strong></p>
+            </div>
+
+            <div class="card" style="border-left: 8px solid var(--highlight-green);">
+              <h4><i class="fa-solid fa-pen-nib"></i> 3. 仕様執筆者（EIP著者）へ</h4>
+              <p>計算手順だけでなく、<strong>システムの「安全前提条件（Assumption）」をどう文章化・要件化すべきかの具体指針が得られる！</strong></p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SLIDE 3: Casper FFG & Finality -->
+      <!-- SLIDE 3: Core Question & Multi-implementation -->
+      <section>
+        <div class="standard-header">
+          <h2>本日の問いと「多実装環境」</h2>
+          <span class="header-meta">問題意識</span>
+        </div>
+        <div class="slide-body">
+          <div class="single-col">
+            <div class="card" style="border-left: 8px solid var(--highlight-red); padding: 30px; text-align: center; margin-bottom: 25px;">
+              <h3 style="font-size: 32px; color: var(--highlight-red); margin: 0 0 10px 0;"><i class="fa-solid fa-circle-question"></i> 核心の問い</h3>
+              <p style="font-size: 26px; font-weight: bold; color: var(--text-main); margin: 0;">「各クライアントを仕様書通りに作っていれば、本当に安全と言い切れるのか？」</p>
+            </div>
+
+            <div class="content-heading"><i class="fa-solid fa-network-wired"></i> 背景：イーサリアムの「多実装環境」</div>
+            <div class="content-text">
+              特定コードへの依存（SPoF）を防ぐため公式ソフトが存在せず、世界中の独立チームが Go, Rust, Java 等で開発・運用。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Casper FFG & Finality -->
       <section>
         <div class="standard-header">
           <h2>確定（ファイナリティ）の仕組み</h2>
@@ -149,7 +175,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 4: Hidden Assumption -->
+      <!-- SLIDE 5: Hidden Assumption -->
       <section>
         <div class="standard-header">
           <h2>見落とされがちな「前提条件」</h2>
@@ -172,7 +198,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 5: EIP Spec Limits -->
+      <!-- SLIDE 6: EIP Spec Limits -->
       <section>
         <div class="standard-header">
           <h2>仕様書（EIP）の穴</h2>
@@ -200,7 +226,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 6: Assertion Concept -->
+      <!-- SLIDE 7: Assertion Concept -->
       <section>
         <div class="standard-header">
           <h2>対策の鍵：「アサーション」とは</h2>
@@ -222,7 +248,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 7: Premise Extraction -->
+      <!-- SLIDE 8: Premise Extraction -->
       <section>
         <div class="standard-header">
           <h2>実験：証明から前提条件を取り出す</h2>
@@ -253,7 +279,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 8: Results Chart -->
+      <!-- SLIDE 9: Results Chart -->
       <section>
         <div class="standard-header">
           <h2>結果：84.2% が仕様書に書かれていない！</h2>
@@ -288,7 +314,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 9: Real Bug Incident -->
+      <!-- SLIDE 10: Real Bug Incident -->
       <section>
         <div class="standard-header">
           <h2>実際の問題：仕様の抜けで起きた障害</h2>
@@ -311,7 +337,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 10: Action Plan Takeaway -->
+      <!-- SLIDE 11: Action Plan Takeaway -->
       <section>
         <div class="standard-header">
           <h2>明日からできる対策（持ち帰りメッセージ）</h2>
@@ -333,7 +359,7 @@
         </div>
       </section>
 
-      <!-- SLIDE 11: Conclusion -->
+      <!-- SLIDE 12: Conclusion -->
       <section>
         <div class="standard-header">
           <h2>まとめ</h2>
