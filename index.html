@@ -1,487 +1,876 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>仕様どおりに実装すれば安全か — イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</title>
-  <!-- Reveal.js Themes -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/white.min.css">
-  <!-- Font Awesome CDN for Tech Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS2026 – 仕様書に書かれていない前提：Casper FFG アサーション解析</title>
+
+  <!-- Google Fonts: JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+
+  <!-- Reveal.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme" />
+
   <style>
+    /* ===== DESIGN TOKENS ===== */
     :root {
-      --corporate-blue: #0072ba;
-      --text-main: #0f172a;
-      --text-sub: #475569;
-      --border-gray: #cbd5e1;
-      --bg-white: #ffffff;
-      --highlight-red: #dc2626;
-      --highlight-green: #16a34a;
-      --highlight-purple: #7c3aed;
-      --highlight-amber: #d97706;
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #21262d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --cyan:      #38bdf8;
+      --orange:    #f97316;
+      --green:     #4ade80;
+      --red:       #f87171;
+      --code-bg:   #0d1117;
     }
-    body { background: #1e293b; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif; }
-    .reveal { background: var(--bg-white); }
-    .reveal .slides section { width: 100% !important; height: 100% !important; padding: 0 !important; display: flex !important; flex-direction: column !important; }
 
-    /* Header */
-    .standard-header { height: 90px; padding: 18px 60px 12px; border-bottom: 4px solid var(--corporate-blue); display: flex; justify-content: space-between; align-items: flex-end; background: #fff; }
-    .standard-header h2 { font-size: 38px !important; font-weight: bold !important; color: var(--text-main) !important; margin: 0 !important; }
-    .standard-header .slide-num { font-size: 18px; color: #94a3b8; font-weight: normal; }
-    .slide-body { flex: 1; padding: 38px 65px 42px; background: #fff; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; }
+    /* ===== REVEAL OVERRIDES ===== */
+    .reveal-viewport { background: var(--bg); }
+    .reveal .slides   { color: var(--text); font-family: system-ui, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; }
+    .reveal .slides section { background: transparent; box-sizing: border-box; padding: 40px 56px; text-align: left; height: 100%; }
+    .reveal h1, .reveal h2, .reveal h3 { font-family: system-ui, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; color: var(--text); margin: 0 0 .4em; line-height: 1.2; text-transform: none; letter-spacing: .01em; }
+    .reveal p, .reveal li { color: var(--text); line-height: 1.6; }
+    .reveal ul { margin: 0; padding-left: 1.4em; }
+    .reveal ul li { margin-bottom: .4em; }
+    .reveal a { color: var(--cyan); }
 
-    /* Layout */
-    .two-col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: stretch; }
-    .single-col { max-width: 1080px; margin: 0 auto; width: 100%; }
+    /* ===== SLIDE NUMBER ===== */
+    .slide-no {
+      position: absolute; bottom: 18px; right: 28px;
+      font-size: .72rem; color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-    /* Text */
-    .label { font-size: 22px; font-weight: bold; color: var(--corporate-blue); margin-bottom: 8px; margin-top: 20px; }
-    .body-text { font-size: 24px; line-height: 1.65; color: #1e293b; margin-bottom: 20px; padding-left: 4px; }
-    .body-text strong { color: var(--text-main); }
+    /* ===== ACCENT COLORS ===== */
+    .cyan   { color: var(--cyan);   }
+    .orange { color: var(--orange); }
+    .green  { color: var(--green);  }
+    .red    { color: var(--red);    }
+    .muted  { color: var(--muted);  }
 
-    /* Box styles */
-    .box { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px; padding: 26px 30px; margin-bottom: 18px; }
-    .box-title { font-size: 24px; font-weight: bold; color: var(--text-main); margin: 0 0 10px 0; }
-    .box-body { font-size: 22px; color: #334155; line-height: 1.65; margin: 0; }
+    /* ===== CARD ===== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      border-radius: 6px;
+      padding: 18px 22px;
+    }
+    .card.orange { border-left-color: var(--orange); }
+    .card.green  { border-left-color: var(--green);  }
+    .card.red    { border-left-color: var(--red);    }
 
-    .box-blue  { border-left: 6px solid var(--corporate-blue); }
-    .box-red   { border-left: 6px solid var(--highlight-red); }
-    .box-green { border-left: 6px solid var(--highlight-green); }
-    .box-amber { border-left: 6px solid var(--highlight-amber); background: #fffbeb; }
-    .box-purple { border-left: 6px solid var(--highlight-purple); }
+    /* ===== GRID HELPERS ===== */
+    .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+    .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: start; }
 
-    /* Key message */
-    .key-box { background: #eff6ff; border: 3px solid #3b82f6; border-radius: 10px; padding: 24px 32px; margin-top: 24px; }
-    .key-box p { margin: 0; font-size: 26px; color: #1e3a8a; font-weight: bold; line-height: 1.5; }
+    /* ===== SLIDE TITLE (section heading inside slide) ===== */
+    .slide-title {
+      font-size: 1.05rem;
+      color: var(--cyan);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .main-heading {
+      font-size: 1.8rem;
+      margin-bottom: 22px;
+    }
 
-    /* Code block */
-    .code-box { background: #0f172a; color: #f8fafc; font-family: monospace; padding: 22px; border-radius: 10px; font-size: 20px; line-height: 1.6; }
+    /* ===== CODE ===== */
+    pre.code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 0;
+      overflow: auto;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: .78rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .kw  { color: #ff7b72; }   /* keyword */
+    .fn  { color: #d2a8ff; }   /* function */
+    .st  { color: #a5d6ff; }   /* string/number */
+    .cm  { color: #8b949e; font-style: italic; } /* comment */
+    .hi  { color: var(--green); font-weight: bold; } /* highlight (assertion) */
 
-    /* Donut chart */
-    .chart-wrap { display: flex; align-items: center; justify-content: center; gap: 40px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px; padding: 32px; }
+    /* ===== FLOW STEP ===== */
+    .flow-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--cyan);
+      border-radius: 6px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+    .flow-num {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .flow-arrow {
+      font-size: 1.6rem;
+      color: var(--muted);
+      align-self: center;
+      text-align: center;
+    }
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 32px 1fr 32px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    /* ===== DONUT CHART ===== */
+    .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
     .donut {
-      width: 190px; height: 190px; border-radius: 50%;
-      background: conic-gradient(var(--highlight-red) 0% 84.2%, #cbd5e1 84.2% 100%);
-      display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0;
+      width: 190px; height: 190px;
+      border-radius: 50%;
+      background: conic-gradient(var(--orange) 0% 84.2%, var(--surface) 84.2% 100%);
+      display: flex; align-items: center; justify-content: center;
     }
-    .donut::before { content: ""; position: absolute; width: 122px; height: 122px; border-radius: 50%; background: #fff; }
-    .donut-text { position: relative; font-size: 38px; font-weight: bold; color: var(--highlight-red); text-align: center; line-height: 1; }
-    .donut-text span { font-size: 16px; color: var(--text-main); display: block; margin-top: 6px; }
+    .donut-hole {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .donut-pct  { font-size: 1.5rem; font-weight: 700; color: var(--orange); }
+    .donut-sub  { font-size: .72rem; color: var(--muted); }
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; font-size: .82rem; }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-dot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 
-    /* Flow */
-    .flow-steps { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 28px; }
-    .flow-box { background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 8px; padding: 20px; flex: 1; text-align: center; }
-    .flow-box h5 { margin: 0 0 6px 0; font-size: 20px; color: var(--corporate-blue); }
-    .flow-box p { margin: 0; font-size: 17px; color: #475569; }
-    .flow-arrow { color: #94a3b8; font-size: 24px; }
+    /* ===== TAG ===== */
+    .tag {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      color: var(--cyan);
+      margin: 2px 3px;
+    }
 
-    /* Title slide */
-    .title-tag { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 18px; font-weight: bold; padding: 6px 14px; border-radius: 6px; margin-bottom: 18px; }
+    /* ===== TITLE SLIDE SPECIFIC ===== */
+    .title-slide { position: relative; display: flex; flex-direction: column; justify-content: center; }
+    .title-accent-line {
+      position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--cyan), transparent);
+    }
+    .title-label { font-size: .8rem; color: var(--cyan); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+    .title-main  { font-size: 2.1rem; font-weight: 700; color: var(--text); line-height: 1.25; margin-bottom: 10px; }
+    .title-sub   { font-size: 1.05rem; color: var(--muted); margin-bottom: 28px; }
+    .title-claim { background: var(--surface); border-left: 3px solid var(--cyan); border-radius: 4px; padding: 10px 16px; font-size: 1rem; color: var(--cyan); font-style: italic; margin-bottom: 28px; }
+    .author-block { position: absolute; bottom: 36px; right: 56px; text-align: right; font-size: .82rem; color: var(--muted); line-height: 1.7; }
+
+    /* ===== STAT BOX ===== */
+    .stat { text-align: center; }
+    .stat-num  { font-size: 3rem; font-weight: 700; }
+    .stat-desc { font-size: .85rem; color: var(--muted); }
+
+    /* ===== SUMMARY LIST ===== */
+    .summary-item { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+    .summary-num  { font-size: 1.4rem; font-weight: 700; color: var(--cyan); line-height: 1; flex-shrink: 0; min-width: 28px; }
+
+    /* Ethereum logo centering */
+    .eth-wrap { display: flex; justify-content: center; align-items: center; height: 100%; }
+
+    /* Force slides background */
+    .reveal .slides section.present,
+    .reveal .slides section.past,
+    .reveal .slides section.future {
+      background: var(--bg) !important;
+    }
+
+    /* progress bar */
+    .reveal .progress { height: 3px; color: var(--cyan); }
+    .reveal .progress span { background: var(--cyan); }
   </style>
 </head>
 <body>
-  <div class="reveal">
-    <div class="slides">
+<div class="reveal">
+<div class="slides">
 
-      <!-- SLIDE 1: Title -->
-      <section>
-        <div class="slide-body" style="padding: 50px 75px;">
-          <div class="single-col">
-            <span class="title-tag">CSS2026</span>
-            <h1 style="font-size: 46px; font-weight: bold; color: var(--text-main); line-height: 1.35; margin: 14px 0 22px 0;">
-              仕様どおりに実装すれば安全か<br>
-              <span style="font-size: 26px; color: var(--text-sub); font-weight: normal;">— イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（予備調査）</span>
-            </h1>
+<!-- =========================================================
+     Slide 1: タイトル
+     ========================================================= -->
+<section class="title-slide" style="position:relative;padding:40px 64px;">
+  <div class="title-accent-line"></div>
 
-            <div class="key-box">
-              <p>「仕様書の実装例をそのまま移植するだけでは安全とは言えない。<br>証明が前提にしている<strong style="color:#1d4ed8;">『隠れた全体ルール』を自動テストで確認する</strong>ことが必要である」</p>
-            </div>
-
-            <div style="font-size: 19px; color: var(--text-sub); margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 18px;">
-              村上 大岳（愛知総合工科高校）／ 神波 真聖・柳浜 万里（Nyx Foundation）／ 釘宮 由成（Independent Researcher）
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 2: What you will take away -->
-      <section>
-        <div class="standard-header">
-          <h2>この発表で得られること</h2>
-          <span class="slide-num">2 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="single-col">
-            <div class="box box-blue">
-              <div class="box-title">実装・開発に携わるエンジニアの方へ</div>
-              <div class="box-body">
-                仕様書の実装例を移植・参考にする際、<strong>「なぜここでバグが起きるのか」</strong>の根本原因がわかります。<br>
-                また、自分のテストコードに追加できる<strong>具体的なチェック方法（アサーション）</strong>を持ち帰れます。
-              </div>
-            </div>
-
-            <div class="box box-red">
-              <div class="box-title">セキュリティ監査・脆弱性診断に携わる方へ</div>
-              <div class="box-body">「仕様書通りに書かれているか」だけでは見つからない危険領域を特定する<strong>57件の前提チェックリスト</strong>を持ち帰れます。ファジングやコードレビューにそのまま使えます。</div>
-            </div>
-
-            <div class="box box-purple">
-              <div class="box-title">形式検証・セキュリティ研究に携わる方へ</div>
-              <div class="box-body">数学的証明ツール（Lean 4）から安全前提を自動抽出する<strong>解析手法</strong>と、仕様書の穴を体系的に特定するアプローチを持ち帰れます。</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 3: Core Question & Multi-implementation -->
-      <section>
-        <div class="standard-header">
-          <h2>出発点：「仕様書通りに作れば安全」は本当か</h2>
-          <span class="slide-num">3 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div style="display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: center;">
-            <div>
-              <div class="box box-red" style="text-align: center; padding: 28px;">
-                <div style="font-size: 30px; font-weight: bold; color: var(--highlight-red); margin-bottom: 6px;">本研究の問い</div>
-                <div style="font-size: 26px; font-weight: bold; color: var(--text-main);">「みんなが仕様書通りに実装していれば、本当に安全と言いきれるのか？」</div>
-              </div>
-
-              <div class="label" style="margin-top: 24px;">イーサリアムの開発体制：公式実装が存在しない</div>
-              <div class="body-text">
-                1つの実装にバグがあってもネットワーク全体が止まらないよう、<br>
-                共通仕様書をもとに Go・Rust・Java など<strong>複数のチームが別々の言語で</strong>クライアントを開発・運用している。
-              </div>
-            </div>
-
-            <!-- Ethereum Logo Illustration -->
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
-              <svg viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" style="width: 180px; opacity: 0.92;" preserveAspectRatio="xMidYMid">
-                <polygon fill="#343434" points="128.167,0 125.012,10.814 125.012,285.012 128.167,288.159 256.334,212.2"/>
-                <polygon fill="#8C8C8C" points="128.167,0 0,212.2 128.167,288.159 128.167,154.174"/>
-                <polygon fill="#3C3C3B" points="128.167,312.187 126.427,314.308 126.427,412.885 128.167,417.986 256.334,236.221"/>
-                <polygon fill="#8C8C8C" points="128.167,417.986 128.167,312.187 0,236.221"/>
-                <polygon fill="#141414" points="128.167,288.159 256.334,212.2 128.167,154.174"/>
-                <polygon fill="#393939" points="0,212.2 128.167,288.159 128.167,154.174"/>
-              </svg>
-              <div style="font-size: 17px; color: #8c8c8c; font-weight: bold; letter-spacing: 0.08em;">Ethereum</div>
-              <div style="font-size: 14px; color: #94a3b8; text-align: center; line-height: 1.5;">世界最大の<br>多実装分散プロトコル</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 4: Why Ethereum -->
-      <section>
-        <div class="standard-header">
-          <h2>なぜイーサリアムで検証したのか</h2>
-          <span class="slide-num">4 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="single-col">
-            <div class="box box-blue" style="padding: 28px; margin-bottom: 22px;">
-              <div class="box-title"><i class="fa-brands fa-ethereum"></i> 世界最大の「多実装分散プロトコル」</div>
-              <div class="box-body" style="font-size: 24px;">
-                確定（ファイナリティ）の仕組みを世界最大規模で実運用しているイーサリアムを、本研究の具体的な検証対象として選びました。
-              </div>
-            </div>
-
-            <div class="box box-amber">
-              <div class="box-title">ここからの解説について</div>
-              <div class="box-body">
-                以降で説明する確定ルールや仕様の構造は、イーサリアムのコンセンサス層（Casper FFG）の仕様に基づいています。
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 5: Finality Rule -->
-      <section>
-        <div class="standard-header">
-          <h2>確定（ファイナリティ）とは何か</h2>
-          <span class="slide-num">5 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="two-col-grid">
-            <div>
-              <div class="label">ファイナリティ</div>
-              <div class="body-text">「一度決まった取引は絶対に覆らない」という保証。<br>これが崩れると、受け取ったはずの送金が消える<strong>二重支払い</strong>が起きる。</div>
-
-              <div class="label">確定のルール（Casper FFG）</div>
-              <div class="body-text">参加者（検証者）が投票し、全体の <strong>2/3 以上</strong>が集まると取引が「確定」とみなされる。</div>
-            </div>
-
-            <div class="box box-blue" style="display: flex; flex-direction: column; justify-content: center;">
-              <div class="box-title">安全の仕組み</div>
-              <div class="box-body">万が一2つの確定が同時に起きても、<strong>両方に投票した不正者を特定して預託資産を没収できる</strong>ことが証明されている。</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 6: Why 2/3 is safe -->
-      <section>
-        <div class="standard-header">
-          <h2>なぜ 2/3 の投票で安全といえるのか</h2>
-          <span class="slide-num">6 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="two-col-grid">
-            <div class="box" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
-              <div class="box-title" style="text-align: center; display: block;">算術的な根拠</div>
-              <div style="font-size: 36px; font-weight: bold; color: var(--corporate-blue); margin: 18px 0;">2/3 ＋ 2/3 ＝ 4/3 ＞ 1</div>
-              <div class="box-body">2つの確定が同時に起きれば、計算上<strong>必ず 1/3 以上が二重投票をしている</strong>ことになる。</div>
-            </div>
-
-            <div class="box box-red" style="display: flex; flex-direction: column; justify-content: center;">
-              <div class="box-title" style="color: var(--highlight-red);">⚠ ここに隠れた前提がある</div>
-              <div class="box-body" style="font-size: 24px; font-weight: bold; color: var(--text-main);">「二重投票した不正者が、コード上で確実に検出されて処分される」</div>
-              <div class="box-body" style="margin-top: 10px; font-size: 18px;">この前提がコードで守られていてはじめて、証明の安全保証が成り立つ。</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 7: EIP Spec Limits -->
-      <section>
-        <div class="standard-header">
-          <h2>仕様書（consensus-specs）の中身と限界</h2>
-          <span class="slide-num">7 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="two-col-grid">
-            <div>
-              <div class="label">仕様書の構成</div>
-              <div class="body-text">英語の説明 ＋ 実際に動く <strong>Python の実装例</strong>。<br>各チームはこの手順を参考に、自分の言語で実装する。</div>
-
-              <div class="label">書いてあること / 書かれていないこと</div>
-              <div class="body-text">
-                ✔ 書いてある：ステップごとの計算手順（How）<br>
-                ✘ 書かれていない：「なぜこれで安全か」という全体ルール（Why）
-              </div>
-            </div>
-
-            <div class="code-box">
-              <span style="color: #f472b6;">if</span> matching_target_balance * <span style="color: #facc15;">3</span> >= total_active_balance * <span style="color: #facc15;">2</span>:<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;state.current_justified_checkpoint = ...<br><br>
-              <span style="color: #ef4444;"># 手順は書かれているが「全体ルール」は書かれていない</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 8: Assertion -->
-      <section>
-        <div class="standard-header">
-          <h2>対策：自動テストのチェックコード（アサーション）</h2>
-          <span class="slide-num">8 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="two-col-grid">
-            <div>
-              <div class="box box-blue">
-                <div class="box-title">アサーション（Assertion）とは</div>
-                <div class="box-body" style="font-size: 22px;">
-                  テスト実行中に「この時点でこのルールが成り立っているはず」という条件を自動検証するコード。<br>
-                  条件が崩れていれば<strong>テストが即座に失敗</strong>し、バグに気づける。
-                </div>
-              </div>
-
-              <div class="label" style="margin-top: 18px;">なぜ必要か</div>
-              <div class="body-text" style="font-size: 22px;">
-                仕様書の実装例には「計算手順」しかない。<br>
-                <strong>「全体ルールが壊れていないか」を確認するコードを自前で追加</strong>することで、実装例の丸写しでは気づけないバグを検出できる。
-              </div>
-            </div>
-
-            <div class="code-box" style="font-size: 18px; align-self: center;">
-              <span style="color: #94a3b8;"># 仕様書の実装例（手順のみ）</span><br>
-              <span style="color: #f472b6;">def</span> process_justification(state):<br>
-              &nbsp;&nbsp;<span style="color: #f472b6;">if</span> votes * <span style="color: #facc15;">3</span> >= total * <span style="color: #facc15;">2</span>:<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;state.checkpoint = ...<br><br>
-
-              <span style="color: #86efac;"># ✅ 自前で追加するアサーション</span><br>
-              <span style="color: #f472b6;">def</span> process_justification(state):<br>
-              &nbsp;&nbsp;<span style="color: #f472b6;">if</span> votes * <span style="color: #facc15;">3</span> >= total * <span style="color: #facc15;">2</span>:<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;state.checkpoint = ...<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #86efac;">assert no_unprocessed_slashings(state)</span><br>
-              &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #86efac;">assert bits_count_valid(state)</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 9: Premise Extraction -->
-      <section>
-        <div class="standard-header">
-          <h2>実験：形式証明から前提条件を自動抽出する</h2>
-          <span class="slide-num">9 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="single-col">
-            <div class="label">アプローチ</div>
-            <div class="body-text">
-              仕様書ではなく、安全性を数学的に証明したツール <strong>Lean 4 の 17 個の定理</strong>から、<br>
-              「どういう前提のもとで安全か」をプログラムで自動抽出した。<br>
-              <span style="font-size: 19px; color: var(--text-sub);">※ Lean 4：プログラムの安全性を数学的に証明するための形式検証ツール</span>
-            </div>
-
-            <div class="flow-steps">
-              <div class="flow-box">
-                <h5>Lean 4 の形式証明</h5>
-                <p>17 個の定理</p>
-              </div>
-              <div class="flow-arrow">›</div>
-              <div class="flow-box" style="border-color: var(--highlight-purple); background: #f5f3ff;">
-                <h5>型から前提を自動抽出</h5>
-                <p>プログラムで処理</p>
-              </div>
-              <div class="flow-arrow">›</div>
-              <div class="flow-box" style="border-color: var(--corporate-blue); background: #eff6ff;">
-                <h5>前提リスト 57 件</h5>
-                <p>AI 混入なし</p>
-              </div>
-            </div>
-
-            <div class="body-text" style="margin-top: 22px; font-size: 20px; color: var(--text-sub);">
-              例：主定理（CHK-GEN-09）から抽出された前提 →「二重投票した不正者が未処分のまま確定に至ってはならない」
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 10: Results -->
-      <section>
-        <div class="standard-header">
-          <h2>結果：前提の 84.2% が仕様書に書かれていなかった</h2>
-          <span class="slide-num">10 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="two-col-grid">
-            <div>
-              <div class="label">分析結果</div>
-              <div class="body-text">57 件のうち <strong>48 件（84.2%）</strong>が仕様書に未記載。<br>7 つの判定器すべてが「明記されている」と判断した前提は <strong>0 件</strong>。</div>
-
-              <div class="label">仕様書と証明のギャップ</div>
-              <div class="body-text">
-                仕様書：「2回投票があったらフラグを立てる」（関数の動き）<br>
-                証明の前提：「不正者が未処分のまま確定に至らない」（全体ルール）
-              </div>
-            </div>
-
-            <div class="chart-wrap">
-              <div class="donut">
-                <div class="donut-text">84.2%<span>未記載</span></div>
-              </div>
-              <div style="font-size: 21px; line-height: 2;">
-                <div style="color: var(--highlight-red); font-weight: bold;">■ 未記載：48件（84.2%）</div>
-                <div style="color: var(--text-sub);">■ 判定割れ：9件（15.8%）</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 11: Real Bug -->
-      <section>
-        <div class="standard-header">
-          <h2>仕様の抜けが実際のバグにつながった事例</h2>
-          <span class="slide-num">11 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="two-col-grid">
-            <div class="box box-red">
-              <div class="box-title" style="color: var(--highlight-red);">Nimbus PR#461（チェーン分裂）</div>
-              <div class="box-body">
-                <strong>障害：</strong>ビット計算のミスにより確定の判定が他クライアントとズレ、ネットワークが実際に 2 分裂した。<br><br>
-                <strong style="color: var(--highlight-green);">修正：</strong>ビット計算の前後にアサーションを追加して検出できるようにした。
-              </div>
-            </div>
-
-            <div class="box box-blue">
-              <div class="box-title">Lighthouse PR#4576</div>
-              <div class="box-body">
-                <strong>障害：</strong>確定計算のロジックに不整合があり、仕様書の手順通りに実装してもバグが入った。<br><br>
-                <strong style="color: var(--highlight-green);">修正：</strong>確定計算ロジック全体を見直し、前提が崩れないよう修正した。
-              </div>
-            </div>
-          </div>
-
-          <div class="body-text" style="margin-top: 22px; font-size: 20px; color: var(--text-sub);">
-            いずれのケースも、仕様書に書かれていなかった全体ルールを見落としたことがバグの根本原因だった。
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 12: Generality -->
-      <section>
-        <div class="standard-header">
-          <h2>これは Web3 だけの話ではない</h2>
-          <span class="slide-num">12 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="single-col">
-            <div class="box box-purple">
-              <div class="box-title">なぜ Web3（イーサリアム）で最初に問題が表面化したのか</div>
-              <div class="box-body" style="font-size: 22px;">
-                「公式実装がなく、共通仕様書から多様な言語へ移植開発される」という環境だったため、この問題が<strong>バグとして先に可視化されただけ</strong>。
-              </div>
-            </div>
-
-            <div class="box box-blue">
-              <div class="box-title">同じ問題が起きうるシステム</div>
-              <div class="box-body" style="font-size: 22px;">
-                仕様の実装例を他言語・他システムへ移植する際に、モデルの暗黙前提が壊れてバグになるリスクは、<br>
-                <strong>Raft・Paxos などの分散合意アルゴリズム、金融決済、OS、ネットワークプロトコル全般</strong>に共通する。
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 13: Conclusion -->
-      <section>
-        <div class="standard-header">
-          <h2>まとめ</h2>
-          <span class="slide-num">13 / 13</span>
-        </div>
-        <div class="slide-body">
-          <div class="single-col">
-            <div class="label">本研究の成果</div>
-            <div class="body-text">
-              Lean 4 の形式証明から 57 件の安全前提を自動抽出し、<strong>84.2% が仕様書に書かれていない</strong>ことを確認した。<br>
-              また、これらの未記載前提が過去の実際のバグの根本原因となっていたことを示した。
-            </div>
-
-            <div class="label">得られた設計指針</div>
-            <div class="body-text">
-              ・仕様書の実装例の丸写し・移植だけでは安全性を保証できない<br>
-              ・「証明が前提にしている全体ルール」を自前のアサーションで常時検証することが必要<br>
-              ・本研究の 57 件リストは、監査・ファジングテストへ直接活用できる
-            </div>
-
-            <div style="margin-top: 28px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 28px; font-weight: bold; color: var(--corporate-blue); text-align: center;">
-              ご清聴ありがとうございました
-            </div>
-          </div>
-        </div>
-      </section>
-
+  <div style="padding-left:16px;">
+    <div class="title-label">Computer Security Symposium 2026</div>
+    <div class="title-main">
+      仕様書に書かれていない前提：<br>
+      <span class="cyan">Casper FFG</span> アサーション解析
+    </div>
+    <div class="title-sub">
+      Ethereum の形式検証から57件の暗黙的前提を抽出し、<br>実装バグとの対応を示す
+    </div>
+    <div class="title-claim">
+      「仕様書通りに実装しても、安全性の証明が前提とするルールは書かれていない」
     </div>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
-  <script>
-    Reveal.initialize({
-      controls: true,
-      progress: true,
-      center: false,
-      hash: true,
-      transition: 'fade',
-      width: 1280,
-      height: 720,
-      margin: 0
-    });
-  </script>
+
+  <div class="author-block">
+    発表者名<br>
+    所属機関<br>
+    <span style="color:var(--cyan);">CSS2026</span>
+  </div>
+
+  <div class="slide-no">1 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 2: この発表で得られること
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-bullseye" style="margin-right:6px;"></i>この発表で得られること</div>
+  <div class="main-heading">3種類の聴衆それぞれへの成果</div>
+
+  <div class="cols3">
+    <div class="card">
+      <div style="font-size:1.6rem;margin-bottom:8px;">⚙️</div>
+      <div style="font-weight:700;color:var(--cyan);margin-bottom:10px;">実装・開発エンジニア</div>
+      <ul style="font-size:.88rem;">
+        <li>バグが起きる<strong>根本原因</strong>の構造</li>
+        <li>アサーションの<strong>具体的な書き方</strong></li>
+        <li>57件の前提リストを<strong>コードに転換</strong>する方法</li>
+      </ul>
+    </div>
+
+    <div class="card orange">
+      <div style="font-size:1.6rem;margin-bottom:8px;">🔍</div>
+      <div style="font-weight:700;color:var(--orange);margin-bottom:10px;">監査・診断エンジニア</div>
+      <ul style="font-size:.88rem;">
+        <li><strong>57件</strong>の前提チェックリスト</li>
+        <li>ファジング・コードレビューに直接活用</li>
+        <li>既存実装の<strong>未検査項目</strong>の特定</li>
+      </ul>
+    </div>
+
+    <div class="card green">
+      <div style="font-size:1.6rem;margin-bottom:8px;">📐</div>
+      <div style="font-weight:700;color:var(--green);margin-bottom:10px;">形式検証・研究者</div>
+      <ul style="font-size:.88rem;">
+        <li>数学的証明から<strong>前提を抽出</strong>する手法</li>
+        <li>Lean 4 の定理解析パイプライン</li>
+        <li>仕様書記載率の<strong>定量評価</strong>手法</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide-no">2 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 3: 問いと背景
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-circle-question" style="margin-right:6px;"></i>問いと背景</div>
+  <div class="main-heading">「仕様書通りに実装すれば、本当に安全か？」</div>
+
+  <div class="cols2" style="align-items:center;">
+    <div>
+      <div class="card" style="margin-bottom:18px;">
+        <div style="font-weight:700;margin-bottom:8px;color:var(--cyan);">多実装環境（Ethereum の例）</div>
+        <p style="font-size:.9rem;margin:0;">
+          Go・Rust・Java・C# など <strong>複数チームが独立して</strong>同一仕様を実装。<br>
+          全実装が仕様書に従っていても、実際にバグが発生した。
+        </p>
+      </div>
+
+      <div style="font-size:.88rem;color:var(--muted);margin-bottom:12px;">実装クライアント例:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;">
+        <span class="tag">go-ethereum</span>
+        <span class="tag">Lighthouse (Rust)</span>
+        <span class="tag">Prysm (Go)</span>
+        <span class="tag">Nimbus (Nim)</span>
+        <span class="tag">Teku (Java)</span>
+        <span class="tag">Lodestar (TS)</span>
+      </div>
+
+      <div class="card red">
+        <div style="font-size:.9rem;">
+          💥 仕様書に従っていても<br>
+          <strong style="color:var(--red);">安全性の証明が前提とするルール</strong>が実装から抜け落ちる
+        </div>
+      </div>
+    </div>
+
+    <div class="eth-wrap">
+      <svg viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" style="width:160px;opacity:0.85">
+        <polygon fill="#8C8C8C" points="128.167,0 125.012,10.814 125.012,285.012 128.167,288.159 256.334,212.2"/>
+        <polygon fill="#c0c0c0" points="128.167,0 0,212.2 128.167,288.159 128.167,154.174"/>
+        <polygon fill="#5a5a5a" points="128.167,312.187 126.427,314.308 126.427,412.885 128.167,417.986 256.334,236.221"/>
+        <polygon fill="#8C8C8C" points="128.167,417.986 128.167,312.187 0,236.221"/>
+        <polygon fill="#383838" points="128.167,288.159 256.334,212.2 128.167,154.174"/>
+        <polygon fill="#6a6a6a" points="0,212.2 128.167,288.159 128.167,154.174"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="slide-no">3 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 4: なぜイーサリアムで検証したのか
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title">なぜ Ethereum で検証したのか</div>
+  <div class="main-heading">世界最大の多実装分散プロトコル</div>
+
+  <div class="cols2" style="align-items:center;gap:36px;">
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:8px;">📡 プロトコルの特性</div>
+        <ul style="font-size:.9rem;">
+          <li><strong>公式参照実装なし</strong> — 仕様書のみが権威</li>
+          <li>6以上の独立チームが並行開発</li>
+          <li>総時価総額 数十兆円規模のネットワーク</li>
+        </ul>
+      </div>
+
+      <div class="card orange">
+        <div style="font-weight:700;color:var(--orange);margin-bottom:8px;">🔬 研究上の理由</div>
+        <ul style="font-size:.9rem;">
+          <li>同じ問題が <strong>最初にバグとして表面化</strong> した場所</li>
+          <li>Lean 4 形式証明が公開されており解析可能</li>
+          <li>実際のPRで修正過程が追跡できる</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:16px;font-size:.88rem;color:var(--muted);">
+        ここからの説明は <strong style="color:var(--text);">Casper FFG 仕様</strong> を具体例として使います
+      </div>
+    </div>
+
+    <div class="eth-wrap">
+      <svg viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" style="width:140px;opacity:0.7">
+        <polygon fill="#8C8C8C" points="128.167,0 125.012,10.814 125.012,285.012 128.167,288.159 256.334,212.2"/>
+        <polygon fill="#c0c0c0" points="128.167,0 0,212.2 128.167,288.159 128.167,154.174"/>
+        <polygon fill="#5a5a5a" points="128.167,312.187 126.427,314.308 126.427,412.885 128.167,417.986 256.334,236.221"/>
+        <polygon fill="#8C8C8C" points="128.167,417.986 128.167,312.187 0,236.221"/>
+        <polygon fill="#383838" points="128.167,288.159 256.334,212.2 128.167,154.174"/>
+        <polygon fill="#6a6a6a" points="0,212.2 128.167,288.159 128.167,154.174"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="slide-no">4 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 5: ファイナリティとは
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-lock" style="margin-right:6px;"></i>確定（ファイナリティ）とは</div>
+  <div class="main-heading">「一度決まった取引は絶対に覆らない」</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:6px;">ファイナリティの定義</div>
+        <p style="font-size:.9rem;margin:0;">
+          ブロックチェーン上のある状態が <strong>永続的に確定</strong> し、<br>
+          後から覆されないことの保証。
+        </p>
+      </div>
+      <div class="card red" style="margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--red);margin-bottom:6px;">💸 崩れると</div>
+        <p style="font-size:.9rem;margin:0;">
+          <strong>二重支払い攻撃</strong>が成立する。<br>
+          同一コインを複数回使用できる致命的な脆弱性。
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card green" style="margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--green);margin-bottom:6px;">✅ Casper FFG の仕組み</div>
+        <ul style="font-size:.88rem;">
+          <li>バリデータの <strong>2/3 以上</strong>が投票 → 確定</li>
+          <li>Supermajority Link（スーパーマジョリティリンク）</li>
+          <li>Checkpoint 間のリンクで連鎖的に確定</li>
+        </ul>
+      </div>
+      <div class="card orange">
+        <div style="font-weight:700;color:var(--orange);margin-bottom:6px;">🛡 安全保証</div>
+        <p style="font-size:.88rem;margin:0;">
+          不正に <strong>両方のブランチに投票</strong>した者（スラッシャブル）を<br>
+          検出し、デポジットを没収（スラッシング）できる。<br>
+          → 不正コストが収益を超える設計
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-no">5 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 6: なぜ 2/3 で安全か
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title">なぜ 2/3 で安全か</div>
+  <div class="main-heading">算術と「隠れた前提」</div>
+
+  <div class="cols2">
+    <div>
+      <div style="color:var(--cyan);font-weight:700;margin-bottom:12px;">📐 算術</div>
+      <div class="card" style="margin-bottom:14px;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.05rem;color:var(--text);line-height:2;">
+          2/3 ＋ 2/3 ＝ 4/3 ＞ 1<br>
+          <span style="color:var(--muted);font-size:.85rem;">↓</span><br>
+          <span style="color:var(--orange);">1/3 以上</span>が必ず<strong>二重投票</strong>
+        </div>
+      </div>
+      <div style="font-size:.86rem;color:var(--muted);">
+        2つの競合するブランチそれぞれに 2/3 が投票したなら、
+        少なくとも 1/3 が<em>両方</em>に投票していることになる。
+      </div>
+    </div>
+
+    <div>
+      <div style="color:var(--orange);font-weight:700;margin-bottom:12px;">⚠️ 隠れた前提（証明が依存するルール）</div>
+      <div class="card orange" style="margin-bottom:12px;">
+        <ul style="font-size:.88rem;">
+          <li>二重投票者が <strong>コード上で確実に検出</strong> される</li>
+          <li>スラッシング処理が <strong>確定より前に完了</strong> している</li>
+          <li>ビット計算・バリデータ集合が <strong>一貫して管理</strong> されている</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <div style="font-size:.88rem;">
+          これらの前提が成り立って<strong>はじめて</strong><br>
+          「2/3 で安全」という証明が有効になる。<br>
+          <span style="color:var(--red);">前提が抜けると証明は成立しない。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-no">6 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 7: 仕様書の限界
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-file-lines" style="margin-right:6px;"></i>仕様書の限界</div>
+  <div class="main-heading">How は書いてある。Why は書かれていない。</div>
+
+  <div class="cols2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:8px;">仕様書に書いてあること</div>
+        <ul style="font-size:.9rem;">
+          <li><strong>How</strong>（計算手順）: 票数の比較、チェックポイントの更新方法</li>
+          <li>関数シグネチャとPython実装例</li>
+          <li>個別ルールのエラー検査</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <div style="font-weight:700;color:var(--red);margin-bottom:8px;">仕様書に書かれていないこと</div>
+        <ul style="font-size:.9rem;">
+          <li><strong>Why</strong>（なぜ安全か）: 証明が依存する全体ルール</li>
+          <li>処理の順序制約（スラッシング先行など）</li>
+          <li>複数関数にまたがるグローバル不変条件</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px;">consensus-specs の実装例（一部）</div>
+      <pre class="code-block"><code><span class="cm"># consensus-specs の実装例</span>
+<span class="kw">if</span> matching_target_balance * <span class="st">3</span> &gt;= \
+        total_active_balance * <span class="st">2</span>:
+    state.current_justified_checkpoint = \
+        ffg_checkpoint
+
+<span class="cm"># 手順はある。</span>
+<span class="cm"># しかし「全体ルール」は書かれていない。</span></code></pre>
+
+      <div style="margin-top:14px;font-size:.85rem;color:var(--muted);">
+        ↑ このコードだけでは、<br>
+        スラッシング処理の完了タイミングや<br>
+        バリデータ集合の一貫性は<strong style="color:var(--text);">検証されない</strong>。
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-no">7 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 8: 対策：アサーション
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-shield-halved" style="margin-right:6px;"></i>対策：アサーション</div>
+  <div class="main-heading">「この時点でこのルールが成り立っているはず」を自動検証する</div>
+
+  <div class="cols2">
+    <div>
+      <div style="font-size:.78rem;color:var(--red);margin-bottom:6px;font-weight:700;">✗ Before（仕様書の実装例のみ）</div>
+      <pre class="code-block"><code><span class="cm"># 仕様書の実装例</span>
+<span class="kw">def</span> <span class="fn">process_justification</span>(state):
+    <span class="kw">if</span> votes * <span class="st">3</span> &gt;= total * <span class="st">2</span>:
+        state.checkpoint = ...
+
+    <span class="cm"># 全体ルールの確認なし</span>
+    <span class="cm"># 前提チェックなし</span></code></pre>
+      <div style="margin-top:10px;font-size:.82rem;color:var(--muted);">
+        手順は正しくても、証明が前提とする<br>
+        グローバル不変条件が満たされているか<strong>不明</strong>。
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:.78rem;color:var(--green);margin-bottom:6px;font-weight:700;">✓ After（アサーション追加）</div>
+      <pre class="code-block"><code><span class="cm"># アサーションを追加</span>
+<span class="kw">def</span> <span class="fn">process_justification</span>(state):
+    <span class="kw">if</span> votes * <span class="st">3</span> &gt;= total * <span class="st">2</span>:
+        state.checkpoint = ...
+        <span class="hi">assert no_unprocessed_slashings(state)</span>
+        <span class="hi">assert bits_count_valid(state)</span>
+
+    <span class="cm"># ↑ 全体ルール確認</span>
+    <span class="cm"># ↑ 前提チェック</span></code></pre>
+      <div style="margin-top:10px;font-size:.82rem;color:var(--muted);">
+        証明が前提とする条件を<strong style="color:var(--green);">実行時に明示検証</strong>。<br>
+        バグは「壊れた不変条件」として即座に検出される。
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-no">8 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 9: 実験手法
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-flask" style="margin-right:6px;"></i>実験手法</div>
+  <div class="main-heading">証明側から前提を抽出する</div>
+
+  <div style="margin-bottom:24px;font-size:.9rem;">
+    仕様書ではなく <strong style="color:var(--cyan);">Lean 4 形式証明</strong> 側から前提を抽出。<br>
+    <span style="color:var(--muted);">Lean 4 = プログラムの安全性を数学的に証明するツール</span>
+  </div>
+
+  <div class="flow-grid" style="margin-bottom:24px;">
+    <div class="flow-step">
+      <div class="flow-num">① 入力</div>
+      <div style="font-weight:700;margin-bottom:6px;font-size:.9rem;">17個の定理</div>
+      <div style="font-size:.8rem;color:var(--muted);">Casper FFG の安全性証明を<br>Lean 4 で記述</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-num">② 自動抽出</div>
+      <div style="font-weight:700;margin-bottom:6px;font-size:.9rem;">プログラム解析</div>
+      <div style="font-size:.8rem;color:var(--muted);">定理の仮説節を構文解析<br>AI 混入なし</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-num">③ 出力</div>
+      <div style="font-weight:700;margin-bottom:6px;font-size:.9rem;">57件の前提リスト</div>
+      <div style="font-size:.8rem;color:var(--muted);">仕様書との照合・<br>実装対応を検査</div>
+    </div>
+  </div>
+
+  <div class="cols2">
+    <div class="card">
+      <div style="font-size:.85rem;">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:6px;">なぜ Lean 4 か</div>
+        証明の仮説節（hypothesis）は<strong>証明が依存する最小条件</strong>を<br>
+        機械検証可能な形で明示する。
+      </div>
+    </div>
+    <div class="card orange">
+      <div style="font-size:.85rem;">
+        <div style="font-weight:700;color:var(--orange);margin-bottom:6px;">照合方法</div>
+        57件の各前提を仕様書テキストと照合し、<br>
+        「明記あり / 暗黙 / 未記載」に3分類。
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-no">9 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 10: 結果
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-chart-pie" style="margin-right:6px;"></i>結果</div>
+  <div class="main-heading">57件中 48件（84.2%）が仕様書に未記載</div>
+
+  <div class="cols2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:10px;">主な数値</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center;">
+          <div class="stat">
+            <div class="stat-num orange" style="font-size:2.2rem;">84.2%</div>
+            <div class="stat-desc">仕様書に未記載の前提</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num cyan" style="font-size:2.2rem;">0件</div>
+            <div class="stat-desc">全員が「明記あり」と判断した前提</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card red">
+        <div style="font-weight:700;color:var(--red);margin-bottom:8px;">ギャップの例</div>
+        <div style="font-size:.85rem;">
+          <div style="margin-bottom:8px;">
+            <span style="color:var(--muted);">仕様書:</span><br>
+            「2回投票があったらフラグを立てる」
+          </div>
+          <div>
+            <span style="color:var(--orange);">証明の前提:</span><br>
+            「<strong>不正者が未処分のまま確定に至ってはならない</strong>」
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="donut-wrap" style="justify-content:center;">
+      <div class="donut">
+        <div class="donut-hole">
+          <div class="donut-pct">84.2%</div>
+          <div class="donut-sub">未記載</div>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--orange);"></div>
+          <div>未記載 / 暗黙 <strong>48件</strong></div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--surface);border:1px solid var(--border);"></div>
+          <div>明記あり <strong style="color:var(--muted);">9件</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-no">10 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 11: 実際のバグ事例
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-bug" style="margin-right:6px;"></i>実際のバグ事例</div>
+  <div class="main-heading">仕様書に書かれていない全体ルールの見落とし</div>
+
+  <div class="cols2">
+    <div class="card" style="border-left-color:var(--red);">
+      <div style="font-weight:700;color:var(--red);margin-bottom:8px;">
+        <i class="fa-brands fa-github" style="margin-right:6px;"></i>Nimbus PR #461
+      </div>
+      <div style="margin-bottom:10px;">
+        <span class="tag" style="color:var(--red);border-color:var(--red);">ビット計算ミス</span>
+        <span class="tag">ネットワーク分裂</span>
+      </div>
+      <div style="font-size:.86rem;margin-bottom:10px;">
+        <strong>現象:</strong> バリデータ集合のビット演算誤りにより<br>
+        ネットワークが <strong style="color:var(--red);">2分裂</strong>。異なるブランチが確定。
+      </div>
+      <div style="font-size:.86rem;margin-bottom:10px;">
+        <strong>根本原因:</strong> 「ビット数が常に一致していること」という<br>
+        グローバル不変条件が未検査。
+      </div>
+      <div style="font-size:.86rem;color:var(--green);">
+        <strong>修正:</strong> アサーションを追加し不変条件を常時検証。
+      </div>
+    </div>
+
+    <div class="card" style="border-left-color:var(--orange);">
+      <div style="font-weight:700;color:var(--orange);margin-bottom:8px;">
+        <i class="fa-brands fa-github" style="margin-right:6px;"></i>Lighthouse PR #4576
+      </div>
+      <div style="margin-bottom:10px;">
+        <span class="tag" style="color:var(--orange);border-color:var(--orange);">確定計算不整合</span>
+        <span class="tag">ロジックエラー</span>
+      </div>
+      <div style="font-size:.86rem;margin-bottom:10px;">
+        <strong>現象:</strong> ファイナリティ計算の内部状態が<br>
+        チェックポイント間で不整合。
+      </div>
+      <div style="font-size:.86rem;margin-bottom:10px;">
+        <strong>根本原因:</strong> 「確定前にスラッシング処理が完了していること」<br>
+        という順序制約が仕様書に未記載。
+      </div>
+      <div style="font-size:.86rem;color:var(--green);">
+        <strong>修正:</strong> 処理順序を明示したロジック修正。
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:18px;" class="card green">
+    <div style="font-size:.88rem;">
+      <strong style="color:var(--green);">共通点:</strong>
+      両バグとも「仕様書に書かれていない全体ルール」の見落としが根本原因。
+      個別の手順実装は正しかった。
+    </div>
+  </div>
+
+  <div class="slide-no">11 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 12: Web3だけではない
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title">Web3 だけではない</div>
+  <div class="main-heading">多実装プロトコル全般に存在する問題</div>
+
+  <div class="cols2" style="margin-bottom:20px;">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:8px;">
+          なぜ Ethereum で先に表面化したか
+        </div>
+        <ul style="font-size:.88rem;">
+          <li><strong>公式実装なし</strong>: 仕様書が唯一の権威</li>
+          <li><strong>多言語移植</strong>: 6チームが独立して実装</li>
+          <li><strong>高い経済インセンティブ</strong>: バグが即座に顕在化</li>
+          <li><strong>透明性</strong>: PR・バグ報告が公開されている</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-weight:700;color:var(--orange);margin-bottom:12px;">同じ問題がありうる領域</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card orange" style="padding:12px 16px;font-size:.88rem;">
+          <strong>分散合意アルゴリズム</strong>: Raft / Paxos の多実装環境
+        </div>
+        <div class="card orange" style="padding:12px 16px;font-size:.88rem;">
+          <strong>金融決済システム</strong>: ISO 20022 / FIX プロトコルの実装差異
+        </div>
+        <div class="card orange" style="padding:12px 16px;font-size:.88rem;">
+          <strong>OS・カーネル</strong>: POSIX 準拠実装間の挙動差
+        </div>
+        <div class="card orange" style="padding:12px 16px;font-size:.88rem;">
+          <strong>ネットワークプロトコル</strong>: TLS / BGP の実装間不整合
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:.88rem;">
+    <strong style="color:var(--cyan);">教訓:</strong>
+    仕様書の品質を上げるだけでは不十分。
+    安全性の証明が前提とするルールを、
+    <strong>実装側でアサーションとして明示する</strong>習慣が必要。
+  </div>
+
+  <div class="slide-no">12 / 13</div>
+</section>
+
+
+<!-- =========================================================
+     Slide 13: まとめ
+     ========================================================= -->
+<section style="padding:40px 56px;position:relative;">
+  <div class="slide-title"><i class="fa-solid fa-flag-checkered" style="margin-right:6px;"></i>まとめ</div>
+  <div class="main-heading">成果と設計指針</div>
+
+  <div class="cols2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--cyan);margin-bottom:8px;">📊 成果</div>
+        <ul style="font-size:.9rem;">
+          <li><strong style="color:var(--orange);">84.2%</strong>（57件中48件）が仕様書に未記載</li>
+          <li>全員が「明記あり」と判断した前提は <strong>0件</strong></li>
+          <li>未記載前提が実際のバグの <strong>根本原因</strong> だった</li>
+        </ul>
+      </div>
+
+      <div style="font-weight:700;color:var(--text);margin-bottom:10px;">🛠 設計指針（3点）</div>
+      <div class="summary-item">
+        <div class="summary-num">1</div>
+        <div style="font-size:.88rem;">仕様書の実装例の<strong>丸写しだけでは安全性を保証できない</strong></div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-num">2</div>
+        <div style="font-size:.88rem;">「証明が前提にしている全体ルール」を<strong>自前のアサーションで常時検証</strong>する</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-num">3</div>
+        <div style="font-size:.88rem;">57件リストは<strong>監査・ファジングに直接活用</strong>できる</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;gap:20px;">
+      <div class="card" style="width:100%;text-align:center;padding:24px;">
+        <div style="font-size:3rem;margin-bottom:8px;">🎯</div>
+        <div style="font-size:1rem;color:var(--cyan);font-weight:700;margin-bottom:6px;">本日の主張</div>
+        <div style="font-size:.88rem;color:var(--muted);font-style:italic;">
+          「仕様書通りに実装しても、<br>安全性の証明が前提とするルールは<br>書かれていない」
+        </div>
+      </div>
+      <div style="font-size:1.05rem;color:var(--text);text-align:center;">
+        ご清聴ありがとうございました
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-no">13 / 13</div>
+</section>
+
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<!-- Reveal.js -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0,
+    minScale: 0.2,
+    maxScale: 2.0,
+    controls: true,
+    progress: true,
+    slideNumber: false,
+    hash: true,
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+  });
+</script>
 </body>
 </html>
