@@ -140,16 +140,32 @@
           <span class="slide-num">3 / 13</span>
         </div>
         <div class="slide-body">
-          <div class="single-col">
-            <div class="box box-red" style="text-align: center; padding: 28px;">
-              <div style="font-size: 30px; font-weight: bold; color: var(--highlight-red); margin-bottom: 6px;">本研究の問い</div>
-              <div style="font-size: 26px; font-weight: bold; color: var(--text-main);">「みんなが仕様書通りに実装していれば、本当に安全と言いきれるのか？」</div>
+          <div style="display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: center;">
+            <div>
+              <div class="box box-red" style="text-align: center; padding: 28px;">
+                <div style="font-size: 30px; font-weight: bold; color: var(--highlight-red); margin-bottom: 6px;">本研究の問い</div>
+                <div style="font-size: 26px; font-weight: bold; color: var(--text-main);">「みんなが仕様書通りに実装していれば、本当に安全と言いきれるのか？」</div>
+              </div>
+
+              <div class="label" style="margin-top: 24px;">イーサリアムの開発体制：公式実装が存在しない</div>
+              <div class="body-text">
+                1つの実装にバグがあってもネットワーク全体が止まらないよう、<br>
+                共通仕様書をもとに Go・Rust・Java など<strong>複数のチームが別々の言語で</strong>クライアントを開発・運用している。
+              </div>
             </div>
 
-            <div class="label" style="margin-top: 24px;">イーサリアムの開発体制：公式実装が存在しない</div>
-            <div class="body-text">
-              1つの実装にバグがあってもネットワーク全体が止まらないよう、<br>
-              共通仕様書をもとに Go・Rust・Java など<strong>複数のチームが別々の言語で</strong>クライアントを開発・運用している。
+            <!-- Ethereum Logo Illustration -->
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+              <svg viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" style="width: 180px; opacity: 0.92;" preserveAspectRatio="xMidYMid">
+                <polygon fill="#343434" points="128.167,0 125.012,10.814 125.012,285.012 128.167,288.159 256.334,212.2"/>
+                <polygon fill="#8C8C8C" points="128.167,0 0,212.2 128.167,288.159 128.167,154.174"/>
+                <polygon fill="#3C3C3B" points="128.167,312.187 126.427,314.308 126.427,412.885 128.167,417.986 256.334,236.221"/>
+                <polygon fill="#8C8C8C" points="128.167,417.986 128.167,312.187 0,236.221"/>
+                <polygon fill="#141414" points="128.167,288.159 256.334,212.2 128.167,154.174"/>
+                <polygon fill="#393939" points="0,212.2 128.167,288.159 128.167,154.174"/>
+              </svg>
+              <div style="font-size: 17px; color: #8c8c8c; font-weight: bold; letter-spacing: 0.08em;">Ethereum</div>
+              <div style="font-size: 14px; color: #94a3b8; text-align: center; line-height: 1.5;">世界最大の<br>多実装分散プロトコル</div>
             </div>
           </div>
         </div>
