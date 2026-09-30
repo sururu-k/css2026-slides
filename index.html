@@ -112,19 +112,22 @@
         </div>
         <div class="slide-body">
           <div class="single-col">
-            <div class="box box-purple">
-              <div class="box-title">セキュリティ研究者・検証者の方へ</div>
-              <div class="box-body">形式証明（Lean 4）から安全前提を自動抽出し、仕様書の抜け穴を特定する<strong>解析手法</strong>を持ち帰れます。</div>
-            </div>
-
             <div class="box box-blue">
-              <div class="box-title">分散システム・プロトコル設計者の方へ（Web3・一般システム共通）</div>
-              <div class="box-body">仕様書の実装例を移植する際、暗黙の前提が壊れていないかを自動テストで検証する<strong>設計方針</strong>を持ち帰れます。</div>
+              <div class="box-title">実装・開発に携わるエンジニアの方へ</div>
+              <div class="box-body">
+                仕様書の実装例を移植・参考にする際、<strong>「なぜここでバグが起きるのか」</strong>の根本原因がわかります。<br>
+                また、自分のテストコードに追加できる<strong>具体的なチェック方法（アサーション）</strong>を持ち帰れます。
+              </div>
             </div>
 
             <div class="box box-red">
-              <div class="box-title">システム監査員・脆弱性診断員の方へ</div>
-              <div class="box-body">「仕様通りに書かれているか」だけでは見つからない危険領域を特定する<strong>57件の前提チェックリスト</strong>を持ち帰れます。</div>
+              <div class="box-title">セキュリティ監査・脆弱性診断に携わる方へ</div>
+              <div class="box-body">「仕様書通りに書かれているか」だけでは見つからない危険領域を特定する<strong>57件の前提チェックリスト</strong>を持ち帰れます。ファジングやコードレビューにそのまま使えます。</div>
+            </div>
+
+            <div class="box box-purple">
+              <div class="box-title">形式検証・セキュリティ研究に携わる方へ</div>
+              <div class="box-body">数学的証明ツール（Lean 4）から安全前提を自動抽出する<strong>解析手法</strong>と、仕様書の穴を体系的に特定するアプローチを持ち帰れます。</div>
             </div>
           </div>
         </div>
@@ -259,18 +262,35 @@
           <span class="slide-num">8 / 13</span>
         </div>
         <div class="slide-body">
-          <div class="single-col">
-            <div class="box box-blue">
-              <div class="box-title">アサーション（Assertion）とは</div>
-              <div class="box-body" style="font-size: 24px; font-weight: bold; color: var(--text-main);">
-                テスト実行中に「この時点でこのルールが成り立っているはず」という条件を自動検証するコード。<br>条件が崩れていればテストが即座に失敗する。
+          <div class="two-col-grid">
+            <div>
+              <div class="box box-blue">
+                <div class="box-title">アサーション（Assertion）とは</div>
+                <div class="box-body" style="font-size: 22px;">
+                  テスト実行中に「この時点でこのルールが成り立っているはず」という条件を自動検証するコード。<br>
+                  条件が崩れていれば<strong>テストが即座に失敗</strong>し、バグに気づける。
+                </div>
+              </div>
+
+              <div class="label" style="margin-top: 18px;">なぜ必要か</div>
+              <div class="body-text" style="font-size: 22px;">
+                仕様書の実装例には「計算手順」しかない。<br>
+                <strong>「全体ルールが壊れていないか」を確認するコードを自前で追加</strong>することで、実装例の丸写しでは気づけないバグを検出できる。
               </div>
             </div>
 
-            <div class="label" style="margin-top: 22px;">なぜ必要か</div>
-            <div class="body-text">
-              仕様書の実装例には手順しか書かれておらず、「全体ルールが守られているか」を確認するコードがない。<br>
-              開発者が<strong>自前のテストケースにアサーションを追加</strong>することで、実装例の丸写しでは見えないバグを検出できる。
+            <div class="code-box" style="font-size: 18px; align-self: center;">
+              <span style="color: #94a3b8;"># 仕様書の実装例（手順のみ）</span><br>
+              <span style="color: #f472b6;">def</span> process_justification(state):<br>
+              &nbsp;&nbsp;<span style="color: #f472b6;">if</span> votes * <span style="color: #facc15;">3</span> >= total * <span style="color: #facc15;">2</span>:<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;state.checkpoint = ...<br><br>
+
+              <span style="color: #86efac;"># ✅ 自前で追加するアサーション</span><br>
+              <span style="color: #f472b6;">def</span> process_justification(state):<br>
+              &nbsp;&nbsp;<span style="color: #f472b6;">if</span> votes * <span style="color: #facc15;">3</span> >= total * <span style="color: #facc15;">2</span>:<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;state.checkpoint = ...<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #86efac;">assert no_unprocessed_slashings(state)</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #86efac;">assert bits_count_valid(state)</span>
             </div>
           </div>
         </div>
@@ -286,8 +306,9 @@
           <div class="single-col">
             <div class="label">アプローチ</div>
             <div class="body-text">
-              仕様書ではなく、安全性を証明した <strong>Lean 4 の 17 個の定理</strong>から、<br>
-              「どういう前提のもとで安全か」をプログラムで自動抽出した。
+              仕様書ではなく、安全性を数学的に証明したツール <strong>Lean 4 の 17 個の定理</strong>から、<br>
+              「どういう前提のもとで安全か」をプログラムで自動抽出した。<br>
+              <span style="font-size: 19px; color: var(--text-sub);">※ Lean 4：プログラムの安全性を数学的に証明するための形式検証ツール</span>
             </div>
 
             <div class="flow-steps">
