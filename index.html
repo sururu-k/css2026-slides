@@ -3,208 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>仕様どおりに実装すれば安全か — イーサリアムのコンセンサス仕様に明示されない安全性の前提条件（CSS2026）</title>
+  <title>仕様どおりに実装すれば安全か — CSS2026</title>
 
-  <!-- Google Fonts: Inter & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <!-- Reveal.js Themes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/white.min.css">
-
-  <!-- Highlight.js Code Theme -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 
   <style>
-    /* ===== CSS2026 ACADEMIC STANDARD STYLES FOR MARKDOWN ===== */
+    /* ===== CSS2026 学会標準スタイル（白背景・ネイビー基調） ===== */
     :root {
-      --navy-primary: #0f2b48;
-      --blue-accent: #0284c7;
-      --blue-bg: #f0f7fc;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
-      --border-color: #cbd5e1;
-    }
-
-    body {
-      background: #f1f5f9;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-      color: var(--text-main);
+      --navy: #1a3550;
+      --blue: #0369a1;
+      --blue-bg: #eef5fb;
+      --text: #1f2937;
+      --muted: #64748b;
+      --border: #d0dbe5;
     }
 
     .reveal {
-      background: #ffffff;
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN",
+                   "Yu Gothic", Meiryo, sans-serif;
+      font-size: 30px;
+      color: var(--text);
     }
 
-    .reveal .slides {
-      text-align: left;
-    }
+    .reveal .slides { text-align: left; }
 
-    /* 各スライドのコンテナスタイル */
-    .reveal .slides section {
-      padding: 30px 48px !important;
-      box-sizing: border-box;
-      height: 100% !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: flex-start !important;
-      top: 0 !important;
-    }
-
-    /* 見出しスタイル */
+    /* 見出し */
     .reveal h1 {
-      font-size: 38px !important;
-      font-weight: 800 !important;
-      color: var(--navy-primary) !important;
-      line-height: 1.3 !important;
-      margin: 15px 0 10px 0 !important;
-      letter-spacing: -0.01em;
+      font-size: 1.6em;
+      font-weight: 700;
+      color: var(--navy);
+      text-transform: none;
+      line-height: 1.35;
     }
-
     .reveal h2 {
-      font-size: 32px !important;
-      font-weight: 700 !important;
-      color: var(--navy-primary) !important;
-      line-height: 1.25 !important;
-      margin: 0 0 18px 0 !important;
-      padding-bottom: 12px;
-      border-bottom: 3px solid var(--navy-primary);
-      display: block;
-      width: 100%;
+      font-size: 1.3em;
+      font-weight: 700;
+      color: var(--navy);
+      text-transform: none;
+      border-bottom: 3px solid var(--navy);
+      padding-bottom: 0.3em;
+      margin-bottom: 0.6em;
     }
-
     .reveal h3 {
-      font-size: 22px !important;
-      font-weight: 600 !important;
-      color: var(--blue-accent) !important;
-      margin: 12px 0 8px 0 !important;
-      text-transform: none !important;
-    }
-
-    /* 本文・リスト */
-    .reveal p {
-      font-size: 20px;
-      line-height: 1.65;
-      color: var(--text-main);
-      margin: 8px 0 14px 0;
-    }
-
-    .reveal ul, .reveal ol {
-      font-size: 20px;
-      line-height: 1.65;
-      color: var(--text-main);
-      margin: 10px 0 18px 24px;
-    }
-
-    .reveal li {
-      margin-bottom: 8px;
-    }
-
-    .reveal li > ul {
-      margin-top: 6px;
-      margin-bottom: 6px;
-      font-size: 18px;
-      color: #334155;
-    }
-
-    .reveal strong {
-      color: var(--navy-primary);
+      font-size: 0.95em;
       font-weight: 700;
+      color: var(--blue);
+      text-transform: none;
+      margin: 0.7em 0 0.3em;
     }
 
-    .reveal em {
-      color: var(--text-muted);
-      font-style: normal;
+    /* 本文 */
+    .reveal p, .reveal li {
+      font-size: 0.82em;
+      line-height: 1.6;
     }
+    .reveal li { margin-bottom: 0.25em; }
+    .reveal li > ul { font-size: 0.9em; color: #374151; }
+    .reveal strong { color: var(--navy); }
+    .reveal em { color: var(--muted); font-style: normal; }
 
-    /* 引用（キーメッセージボックス） */
+    /* キーメッセージ（引用ブロック） */
     .reveal blockquote {
-      width: 100% !important;
-      margin: 14px 0 18px 0 !important;
-      padding: 16px 22px !important;
-      background: var(--blue-bg) !important;
-      border-left: 5px solid var(--blue-accent) !important;
-      border-radius: 6px;
-      box-shadow: none !important;
-      box-sizing: border-box;
-      font-size: 19px !important;
-      line-height: 1.6 !important;
-      color: #0369a1 !important;
-    }
-
-    .reveal blockquote strong {
-      color: #0c4a6e !important;
-    }
-
-    /* テーブルスタイル */
-    .reveal table {
       width: 100%;
-      border-collapse: collapse;
-      margin: 18px 0;
-      font-size: 18px;
+      margin: 0.7em 0;
+      padding: 0.6em 1em;
+      background: var(--blue-bg);
+      border-left: 6px solid var(--blue);
+      border-radius: 4px;
+      box-shadow: none;
+      font-size: 0.8em;
+      line-height: 1.55;
+      color: #075985;
     }
+    .reveal blockquote p { margin: 0; font-size: inherit; }
 
-    .reveal th {
-      background: #f8fafc;
-      color: var(--navy-primary);
-      font-weight: 700;
-      border: 1.5px solid var(--border-color);
-      padding: 10px 16px;
-    }
+    /* テーブル */
+    .reveal table { font-size: 0.72em; margin: 0.7em auto; }
+    .reveal th { background: #f1f5f9; color: var(--navy); }
+    .reveal th, .reveal td { padding: 0.4em 0.8em; border: 1px solid var(--border); }
 
-    .reveal td {
-      border: 1.5px solid var(--border-color);
-      padding: 10px 16px;
-      line-height: 1.5;
-    }
-
-    /* コードブロック */
+    /* コード */
     .reveal pre {
-      width: 100% !important;
-      box-shadow: none !important;
-      margin: 14px 0 !important;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #334155;
+      width: 100%;
+      margin: 0.6em 0;
+      box-shadow: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.55em;
     }
-
-    .reveal pre code {
-      font-family: 'JetBrains Mono', Consolas, monospace !important;
-      font-size: 16px !important;
-      line-height: 1.55 !important;
-      padding: 18px 22px !important;
-      max-height: 380px;
-    }
+    .reveal pre code { padding: 0.8em 1em; max-height: 420px; }
 
     /* スライド番号 */
     .reveal .slide-number {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 15px;
-      font-weight: 700;
-      color: #94a3b8;
+      font-size: 0.55em;
+      color: var(--muted);
       background: transparent;
-      right: 24px;
-      bottom: 16px;
     }
+
+    /* タイトルスライド */
+    .reveal .slides section:first-child { text-align: center; }
+    .reveal .slides section:first-child h1 { border-bottom: none; }
   </style>
 </head>
 <body>
   <div class="reveal">
     <div class="slides">
-      <!-- Reveal.js Markdown Plugin will parse and render slides.md -->
       <section data-markdown="slides.md"
-               data-separator="^---$"
+               data-separator="^\n---\n"
                data-separator-notes="^Note:">
       </section>
     </div>
   </div>
 
-  <!-- Reveal.js Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/markdown/markdown.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/highlight/highlight.min.js"></script>
@@ -214,15 +126,13 @@
     Reveal.initialize({
       width: 1280,
       height: 720,
-      margin: 0.05,
-      minScale: 0.2,
-      maxScale: 2.0,
-      center: false,
+      margin: 0.04,
+      center: true,
       controls: true,
       progress: true,
       slideNumber: 'c/t',
       hash: true,
-      transition: 'fade',
+      transition: 'none',
       plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ]
     });
   </script>
