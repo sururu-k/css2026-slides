@@ -17,14 +17,11 @@ Note:
 ## 目次
 
 <div class="agenda-list">
-<div class="agenda-row"><span class="no">1</span><span class="name">背景</span><span class="desc">Ethereumは複数の実装で動き、食い違いは実害になる</span></div>
-<div class="agenda-row"><span class="no">2</span><span class="name">先行研究</span><span class="desc">チェックリスト生成が、監査の質を決める。その限界</span></div>
-<div class="agenda-row"><span class="no">3</span><span class="name">過去の事例</span><span class="desc">Ethereumの合意の安全性は、Leanで書かれつつある</span></div>
-<div class="agenda-row"><span class="no">4</span><span class="name">RQ</span><span class="desc">Leanの前提は、仕様の文章にどれだけ明示されているか</span></div>
-<div class="agenda-row"><span class="no">5</span><span class="name">提案手法</span><span class="desc">Leanの前提を取り出し、仕様の文章と突き合わせる</span></div>
-<div class="agenda-row"><span class="no">6</span><span class="name">実験結果</span><span class="desc">前提は、仕様にどれだけ明示されていたか</span></div>
-<div class="agenda-row"><span class="no">7</span><span class="name">考察</span><span class="desc">実際のバグと前提の非明示は、どう関係しうるか</span></div>
-<div class="agenda-row"><span class="no">8</span><span class="name">まとめ</span><span class="desc">分かったことと、まだ言えないこと</span></div>
+<div class="agenda-row"><span class="no">1</span><span class="name">背景</span><span class="desc">Ethereumの仕組みと、仕様駆動の監査。Leanで書かれつつある安全性</span></div>
+<div class="agenda-row"><span class="no">2</span><span class="name">研究内容</span><span class="desc">仕様書に前提条件は、どれだけ明示されているか</span></div>
+<div class="agenda-row"><span class="no">3</span><span class="name">提案手法</span><span class="desc">Leanの前提を取り出し、仕様の文章と突き合わせる</span></div>
+<div class="agenda-row"><span class="no">4</span><span class="name">実験結果</span><span class="desc">前提は仕様にどれだけ明示されていたか。実際のバグとの関係</span></div>
+<div class="agenda-row"><span class="no">5</span><span class="name">考察・まとめ</span><span class="desc">分かったことと、まだ言えないこと</span></div>
 </div>
 
 Note:
@@ -67,9 +64,9 @@ Note:
 
 ---
 
-<p class="section-tag">先行研究</p>
+<p class="section-tag">背景</p>
 
-## 先行研究：SPECAでは、プロパティ生成が監査の質を決める
+## SPECA：プロパティ生成が監査の質を決める
 
 <p class="term-line"><span class="term">仕様駆動の監査</span><br>仕様からチェックリストを大量に作り、それに照らして監査する。<br>その一つが、私たちの先行研究 SPECA（チェックリストを「プロパティ」と呼ぶ）。</p>
 <img class="speca-visual" src="figs/diagram-speca-architecture.svg" alt="SPECAの構成。仕様、仕様の探索、サブグラフ抽出、プロパティ生成、コード箇所の特定、証明試行による監査、レビューの順。プロパティ生成が監査の質を決める">
@@ -84,9 +81,9 @@ Note:
 
 ---
 
-<p class="section-tag">先行研究</p>
+<p class="section-tag">背景</p>
 
-## 先行研究の限界：プロパティ生成の入力は、仕様の文章だけ
+## SPECAの限界：プロパティ生成の入力は、仕様の文章だけ
 
 <div class="grid">
 <div class="panel"><p class="label">仕様の文章から生成（現在）</p><p>文章に書かれたことだけが、<br>プロパティの元になる。<br>書かれていない前提は拾えない。</p></div>
@@ -102,95 +99,196 @@ Note:
 
 ---
 
-<p class="section-tag">過去の事例</p>
+<p class="section-tag">背景</p>
 
 ## Lean: 定理の証明を機械が検査する言語
 
-<div class="grid three">
-<div class="panel purple"><h3>定理</h3><p>仮説（条件）と<br>結論（保証）の組。</p></div>
-<div class="panel"><h3>カーネルが検査</h3><p>証明に穴があれば、<br>受理されない。</p></div>
-<div class="panel blue"><h3>Ethereumでは</h3><p>合意の安全性の定理が、<br>Leanで書かれつつある。</p></div>
+<div class="lean-layout">
+<div class="lean-editor">
+<div class="filebar">Quorums.lean</div>
+<div class="lean-code">
+<div class="ln">1</div><div class="src"><span class="kw">structure</span> Threshold <span class="kw">where</span></div>
+<div class="ln">2</div><div class="src">  one_third : Nat → Nat</div>
+<div class="ln">3</div><div class="src">  two_third : Nat → Nat</div>
+<div class="ln">4</div><div class="src"> </div>
+<div class="ln">5</div><div class="src"><span class="kw">def</span> wt (stake : Validator → Nat)</div>
+<div class="ln">6</div><div class="src">    (s : Finset Validator) : Nat := s.sum stake</div>
+<div class="ln">7</div><div class="src"> </div>
+<div class="ln">8</div><div class="src"><span class="kw">def</span> quorum_2 (τ stake vset vs b) : Prop :=</div>
+<div class="ln">9</div><div class="src">  vs ⊆ vset b ∧</div>
+<div class="ln">10</div><div class="src">  τ.two_third (wt stake (vset b)) ≤ wt stake vs</div>
+<div class="ln">11</div><div class="src"> </div>
+<div class="ln">12</div><div class="src"><span class="thm">theorem</span> quorum_intersection_weight_lower</div>
+<div class="ln">13</div><div class="src">    (hqLsub : qL ⊆ vL) (hqRsub : qR ⊆ vR)</div>
+<div class="ln">14</div><div class="src">    (hqLwt : τ.two_third (wt stake vL)</div>
+<div class="ln">15</div><div class="src">               ≤ wt stake qL)  … :</div>
+<div class="ln">16</div><div class="src">    … ≤ wt stake (qL ∩ qR) := …</div>
 </div>
-<p class="message">Ethereumの合意の安全性は、<strong>Leanの定理</strong>として書かれようとしている。</p>
-
+</div>
+<div class="lean-pipe">
+<div class="pipe-arrow"><code>lake build</code> ↓</div>
+<div class="pipe-box">
+<svg class="dep-graph" viewBox="0 0 560 84" role="img" aria-label="Threshold と wt から quorum_2 が作られ、その上に定理 quorum_intersection_weight_lower が乗る依存ツリー">
+<defs><marker id="dep-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7d909e"/></marker></defs>
+<g stroke="#7d909e" stroke-width="1.5" fill="none" stroke-linejoin="round" marker-end="url(#dep-head)">
+<path d="M112,21 H142 V42 H166"/><path d="M112,63 H142 V42 H166"/><path d="M286,42 H336"/>
+</g>
+<g font-family="Consolas, monospace" font-size="15" text-anchor="middle">
+<rect x="8" y="8" width="104" height="26" rx="13" fill="#fff" stroke="#006ba6" stroke-width="1.5"/><text x="60" y="26" fill="#263746">Threshold</text>
+<rect x="8" y="50" width="104" height="26" rx="13" fill="#fff" stroke="#006ba6" stroke-width="1.5"/><text x="60" y="68" fill="#263746">wt</text>
+<rect x="170" y="29" width="116" height="26" rx="13" fill="#fff" stroke="#006ba6" stroke-width="1.5"/><text x="228" y="47" fill="#263746">quorum_2</text>
+<rect x="340" y="29" width="212" height="26" rx="13" fill="#fdf0e9" stroke="#b64b12" stroke-width="1.7"/><text x="446" y="47" fill="#b64b12" font-size="13">quorum_intersection_…</text>
+</g>
+</svg>
+</div>
+<div class="pipe-arrow">↓</div>
+<div class="kernel-band">
+<p class="step-head">カーネルが型を検査</p>
+<p class="verdict ok"><span class="mark">✓</span><span>型が付く　＝　証明完了</span></p>
+<p class="verdict ng"><span class="mark">×</span><span>型が付かない　＝　証明不備</span></p>
+</div>
+<div class="pipe-arrow"><code>def</code> ↓</div>
+<div class="pipe-box">
+<p class="step-head">実行バイナリ</p>
+<div class="c-strip">// Lean compiler output
+LEAN_EXPORT lean_object* l_quorum__2(…)</div>
+</div>
+</div>
+</div>
 Note:
-このスライドで話すこと：Leanとは何か、Ethereumでどう使われているか。
-Leanは、定理の証明を機械が検査する言語です。定理は、仮説と結論の組です。
-証明に穴があると、Leanのカーネルが受理しません。通らなければ危ない、という機械的な検査に使われます。
-Ethereumの世界では、合意の安全性を示す定理を、Leanで書く取り組みが進んでいます。まだ書き切られてはいません。私たちが使ったのは、その一つのgasper-lean4です。
+このスライドで話すこと：Leanがどう動くか。この仕組みがあるから、次のページ以降の「前提の取り出し」が成り立つ。
+左が実際のソースです。structureで構造を決め、defで関数や述語を定義し、theoremで定理を書きます。ここではThresholdという構造体、重みを合計するwtという関数、2/3クォーラムを表すquorum_2という述語、そしてクォーラム交差の定理を並べています。gasper-lean4の実物からの抜粋で、引数の一部は省略しています。
+lake buildを走らせると、ソースは環境（Environment）になります。環境は宣言の依存グラフです。Thresholdとwtの上にquorum_2が立ち、その上に定理が乗る、という関係が機械的に出てきます。
+カーネルはこの依存グラフを一つずつたどって型を検査します。命題と証明が型と項に対応しているので、証明の検査が型検査になります。型が付けば証明完了、付かなければ証明不備で、受理されません。
+さらに、型が付いたdefはコード生成に回ります。Cが出て、leancがそれをコンパイルし、実行可能なバイナリになります。証明した定義を、そのまま実装として動かせるということです。theoremはPropなので実行コードには残りません。
+カーネルが検査するのは型付けであって、どの前提を置くかは人が決めます。聞かれたら、追加公理やsorryは#print axiomsで別に監査する、と答えます。
+ここで大事なのは右上の一点です。定理の前提は、証明の中ではなく、定理文の型シグネチャにすべて書かれています。だから前提は、解釈なしに機械的に列挙できます。これが次のページ以降の出発点です。
 
 ---
 
-<p class="section-tag">RQ</p>
+<p class="section-tag">研究内容</p>
 
-## RQ：Leanの前提は、仕様の文章にどれだけ明示されているか
+## 本研究の内容
 
-<div class="grid">
-<div class="panel purple"><p class="label">Leanの定理</p><p>仮説（前提）が、<br>すべて書かれている。</p></div>
-<div class="panel blue"><p class="label">仕様の文章</p><p>その前提は、<br>どこまで書かれているか。</p></div>
+<div class="qa-block rq">
+<p class="blabel">リサーチクエスチョン</p>
+<p class="btext">仕様書に前提条件は、どれだけ明示されているか？</p>
 </div>
-<p class="message">Leanの前提が、仕様の文章に<strong>どれだけ明示されているか</strong>を調べた。</p>
+<div class="qa-block">
+<p class="blabel">研究内容</p>
+<p class="bnote">Lean で形式化された仕様と仕様書を<strong>一件ずつ照合</strong>し、前提が明記されている件数をカウントした。</p>
+<div class="compare">
+<div class="lean-editor">
+<div class="filebar"><span>SlashableBound.lean</span><span class="origin">gasper-lean4</span></div>
+<div class="lean-code">
+<div class="ln">1</div><div class="src"><span class="thm">theorem</span> quorum_intersection_weight_lower</div>
+<div class="ln">2</div><div class="src"><span class="cm">    …</span></div>
+<div class="ln">3</div><div class="src">    (hqLsub : <mark>qL ⊆ vL</mark>)</div>
+<div class="ln">4</div><div class="src">    (hqRsub : <mark>qR ⊆ vR</mark>)</div>
+<div class="ln">5</div><div class="src">    (hqLwt : <mark>τ.two_third (wt stake vL) ≤ wt stake qL</mark>)</div>
+<div class="ln">6</div><div class="src">    (hqRwt : <mark>τ.two_third (wt stake vR) ≤ wt stake qR</mark>) :</div>
+<div class="ln">7</div><div class="src"><span class="cm">    …</span></div>
+</div>
+</div>
+<div class="lean-editor">
+<div class="filebar"><span>phase0/beacon-chain.md</span><span class="origin">consensus-specs</span></div>
+<div class="lean-code">
+<div class="ln">1</div><div class="src"><span class="kw">def</span> weigh_justification_and_finalization(</div>
+<div class="ln">2</div><div class="src"><span class="cm">    …</span></div>
+<div class="ln">3</div><div class="src">) -> None:</div>
+<div class="ln">4</div><div class="src"><span class="cm">    …</span></div>
+<div class="ln">5</div><div class="src">    <span class="kw">if</span> <mark>previous_epoch_target_balance * 3</mark> \</div>
+<div class="ln">6</div><div class="src">            <mark>>= total_active_balance * 2</mark>:</div>
+<div class="ln">7</div><div class="src"><span class="cm">    …</span></div>
+</div>
+</div>
+</div>
+</div>
 
 Note:
-このスライドで話すこと：案を試すために立てた問い。
-SPECAの側にも、Leanの定理を確認項目へ変換するプラグインがあります。
-これを進めるうちに、定理の前提が、仕様の文章にどのくらい明示されているのかが気になりました。
-これが今回の研究内容です。Leanの定理には前提がすべて書かれています。その前提が、仕様の文章に書かれているかを調べました。
+このスライドで話すこと：この研究で何を問い、何をしたか。
+問いは一つです。安全性定理が要求する前提条件が、仕様書にどれだけ明示されているか。
+やったことも一つです。Leanで形式化された仕様と、Ethereumの仕様書を、前提ごとに一件ずつ照合して、明記されている件数を数えました。
+下の2枚がその一件分です。左がLeanの定理で、黄色が成立に必要な前提。右が同じ2/3を扱う仕様書の箇所で、黄色が仕様側で見つかる対応物です。2/3の算術はあります。ですが、左の⊆、つまり集計対象への包含にあたる記述は、右にはありません。
+この作業を全件について繰り返しました。何件を何件と照合したのかは、次の2枚で示します。
 
 ---
 
 <p class="section-tag">提案手法</p>
 
-## 提案手法：Leanの前提を取り出し、仕様の文章と突き合わせる
+## コンセンサスプロトコルの安全性に関する17の定理から、前提条件が57件
+<!-- .element: class="one-line" -->
 
-<p class="lead-in">Leanの定理：<strong>仮説（条件） ⇒ 結論（保証）</strong></p>
-<div class="grid">
-<div class="panel"><p class="step-label">Step 1</p><h3>前提を抽出</h3><p><strong>仮説を列挙</strong></p><p class="actor">構文的・LLM不使用</p></div>
-<div class="panel blue"><p class="step-label">Step 2</p><h3>仕様の文章と照合</h3><p>書かれているかを判定</p><p class="actor">キーワード照合器＋6種類のLLM</p></div>
-</div>
-<p class="message">抽出は構文を読むだけで、生成は入らない。<br>判定は自動で、正解ラベルとの照合は<strong>未実施</strong>。</p>
+<table class="thm-list">
+<tr><th>定理</th><th>何を言う定理か</th></tr>
+<tr><td><code>k_safety'</code></td><td>相反する2つの確定ブロックは、2/3交差のスラッシュを導く</td></tr>
+<tr><td><code>k_non_equal_height_case</code></td><td>高さが違う相反確定でも、交差はスラッシュ対象</td></tr>
+<tr><td><code>k_slash_surround_case_general</code></td><td>確定をまたぐ正当化リンクも、交差のスラッシュを導く</td></tr>
+<tr><td><code>no_k_finalized_justified_same_height</code></td><td>交差が未スラッシュなら、確定と別の正当化は同じ高さを取れない</td></tr>
+<tr><td><code>finalization_fork_means_same_finalization_fork_one</code></td><td>確定の分岐は、深さ1の分岐と同値</td></tr>
+<tr><td><code>slashable_bound</code></td><td>分岐のときスラッシュされる重みの下界</td></tr>
+<tr><td><code>quorum_intersection_weight_lower</code></td><td>2つのクォーラムの交差が持つ重みの下界</td></tr>
+<tr><td><code>validator_intersection_lower_bound</code></td><td>出入りを調整した名簿の重みは、名簿の交差で押さえられる</td></tr>
+<tr><td><code>plausible_liveness_construct_extension</code></td><td>健全な2/3があれば、確定を進める拡張を構成できる</td></tr>
+<tr><td><code>no_two_justified_same_height</code></td><td>交差が未スラッシュなら、同じ高さで2ブロックは正当化されない</td></tr>
+<tr><td><code>two_justified_same_height_slashed</code></td><td>同じ高さで2ブロックが正当化されたら、交差はスラッシュ対象</td></tr>
+<tr><td><code>finalized_means_justified_child</code></td><td>確定したブロックには、正当化された子がある</td></tr>
+<tr><td><code>k_finalized_means_justified</code></td><td>k-確定したブロックは、正当化されている</td></tr>
+<tr><td><code>justified_iff_bounded</code></td><td>正当化の述語と、実行できる判定関数が一致する</td></tr>
+<tr><td><code>slashed_double_vote_iff_bex</code></td><td>スラッシュ判定と、二重投票の存在が一致する</td></tr>
+<tr><td><code>slashed_surround_vote_iff_bex</code></td><td>スラッシュ判定と、囲い込み投票の存在が一致する</td></tr>
+<tr><td><code>q_intersection_slashed_iff_exists_witness</code></td><td>交差のスラッシュ判定と、証拠の探索が一致する</td></tr>
+</table>
 
 Note:
-このスライドで話すこと：問いにどう答えたか。前提を取り出す段階と、仕様に書かれているかを判定する段階は別。
-手法は二段です。
-一段目は、Leanの定理文から仮説を取り出す処理です。定理文の構文を読むだけで、AIの生成は入りません。だから、証明に無い前提が混ざることはありません。
-二段目は、取り出した前提が、仕様の文章に安全性の要件として書かれているかの判定です。ここは、キーワード照合器と6種類のLLMによる自動判定です。
-判定器どうしの一致は見ていますが、人が付けた正解ラベルとの照合は、まだしていません。
+このスライドで話すこと：照合した左側、Leanの証明が何だったか。
+gasper-lean4のcommit 7650709から、安全性に関わる17の定理を取りました。8ファイルにまたがっています。17定理はすべて実在し、sorryを含みません。
+上の5つが安全性の核心です。相反する2つの確定ブロックがあれば、2/3のクォーラム交差がスラッシュ対象になる。これがaccountable safetyの本体で、残りは高さが同じ場合、違う場合、囲い込み投票の場合と、場合分けの枝です。
+真ん中はスラッシュされる重みの下界と、正当化の基本性質です。
+下の4つは、述語と実行できる判定関数が一致することを言う定理です。証明の世界と実装の世界をつなぐ部分です。
+この17定理から、延べ57件の前提条件が出てきます。この57件が、このあとの分母です。
 
 ---
 
 <p class="section-tag">提案手法</p>
 
-## 実験手法：定理に書かれた「条件」の部分を取り出す
+## 文字・意味検索により、定理と関連する3つの仕様書を特定
 
-<div class="grid" style="margin-bottom: 4px;">
-<div><h3 style="margin: 0 0 8px;">定理文のコロンの手前を抜き出す</h3><div class="proof-code tight" style="padding: 8px 12px; font-size: 15px;"><div class="muted">theorem quorum_intersection_weight_lower</div><div class="muted">　{ qL qR vL vR : … }  -- 部品（除外）</div><div>　( hqLsub : <mark>qL ⊆ vL</mark> )</div><div>　( hqRsub : <mark>qR ⊆ vR</mark> )</div><div>　( hqLwt : <mark>τ.two_third (wt stake vL) ≤ wt stake qL</mark> )</div><div>　( hqRwt : <mark>τ.two_third (wt stake vR) ≤ wt stake qR</mark> )</div><div class="muted">　: 結論（保証）</div></div><p class="small" style="margin: 4px 0 0; font-size: 18px;">括弧群＝前提（Leanでは仮説）。構文的に列挙し実体条件を選別。</p></div>
-<div class="premise-list"><h3 style="margin: 0 0 8px;">取り出される前提の意味</h3><div class="premise" style="padding: 6px 10px; margin-bottom: 6px; font-size: 20px;"><p style="margin: 0;"><strong>① 参加者集合の包含：</strong><br>支持した参加者が、その側の集計対象に含まれる。</p></div><div class="premise" style="padding: 6px 10px; margin-bottom: 6px; font-size: 20px;"><p style="margin: 0;"><strong>② クォーラム：</strong><br>その集計対象の総重みに対して、2/3以上の重みが支持する。</p></div><p class="small" style="margin: 4px 0 0; font-size: 18px;">この条件を、<strong>両側（フォーク双方）</strong>で満たす必要がある。</p></div>
-</div>
-<p class="message" style="margin: 4px 0 0; font-size: 28px;">この②が、<strong>「クォーラム」</strong>という概念。<br>次のスライドで、この語が仕様の文章にどれだけ出てくるかを見る。</p>
+<table class="thm-list spec-list">
+<tr><th>ファイル／セクション</th><th>仕様の内容</th><th class="n">定理数（重複あり）</th></tr>
+<tr class="group"><td colspan="3"><code>phase0/beacon-chain.md</code>　ビーコンチェーンの状態遷移</td></tr>
+<tr><td class="sec"><code>#process_justification_and_finalization</code></td><td>2/3の集計で正当化と確定を進める</td><td class="n">8</td></tr>
+<tr><td class="sec"><code>#process_slashings</code></td><td>スラッシュの適用と残高の減算</td><td class="n">3</td></tr>
+<tr><td class="sec"><code>#process_attestation</code></td><td>投票の受理と集計への反映</td><td class="n">2</td></tr>
+<tr><td class="sec"><code>#process_epoch</code></td><td>エポック末の一括処理</td><td class="n">1</td></tr>
+<tr><td class="sec"><code>#process_registry_updates</code></td><td>バリデータ名簿の出入り</td><td class="n">1</td></tr>
+<tr><td class="sec"><code>#process_effective_balance_updates</code></td><td>実効残高の更新</td><td class="n">1</td></tr>
+<tr class="group"><td colspan="3"><code>phase0/fork-choice.md</code>　フォーク選択</td></tr>
+<tr><td class="sec"><code>#on_block</code></td><td>ブロックを受け取ったときの選択規則</td><td class="n">1</td></tr>
+<tr class="group"><td colspan="3"><code>phase0/p2p-interface.md</code>　ノード間の通信</td></tr>
+<tr><td class="sec"><code>#the-gossip-domain-gossipsub</code></td><td>ゴシップで受け取る前の検証規則</td><td class="n">2</td></tr>
+</table>
 
 Note:
-このスライドで話すこと：定理の仮説が、どの条件を指すかを具体例で示す。
-左の記号は細かく読む必要はありません。要点は右の日本語2行です。「支持した人が名簿に入っているか」「クォーラム（全体の2/3以上）を満たすか」。
-定理文は「theorem 名前（仮説）…：結論」という形で、コロンの手前の括弧が前提です。ツールはこれをLeanの構文として読み、型やモデルの部品を除いて実体条件だけを選別します。
-解釈も生成も挟まない決定的な処理で、何度やっても同じ一覧が出ます。今回は8ファイル17定理から延べ57件が出ました。
-②の「クォーラム」は、今回の10概念のうちの1つです。次のスライドの結果と、このあと直接つながります。
+このスライドで話すこと：照合した右側、仕様書が何だったか。
+consensus-specsのcommit 2359a5eの、specs以下のマークダウン全89ファイルを探索しました。シンボル名でgrep、同義語や言い換えでgrep、最後に関連ファイルの通読という3段です。
+その結果、17定理に対応づいたのは3ファイル・8セクションでした。中心はbeacon-chain.mdの正当化とファイナリゼーションの箇所で、8定理がここに対応します。フォーク選択とゴシップの検証規則にもまたがっていて、単一ファイルに閉じた探索ではありません。
+右の列は、そのセクションに対応する定理の数です。同じ定理が複数のセクションに対応することがあるので、合計は17を超えます。
+この対応づけは、Leanの定義から仕様シンボルへの表を引いているだけで、解釈は挟んでいません。
 
 ---
 
 <p class="section-tag">実験結果</p>
 
-## 抽出結果：Leanの前提は、仕様の文章に明示されていなかった
+## 抽出結果：前提条件は、57件中48件が仕様の文章に明示されていなかった
 
-<p class="lead-in">さきほどの「クォーラム」を含め、取り出した前提を仕様の文章（89ファイル）と照合した。</p>
-<img class="result-visual" src="figs/chart-premises.svg" alt="48/57件、84.2%のドーナツ図と57マス。青48マスは全自動判定で非明示、橙9マスは判定が分かれた" style="height:200px">
-<p class="message"><strong>10概念中7概念</strong>が非明示と判定。<strong>「クォーラム」という語自体、稼働中の仕様には0件。</strong></p>
+<img class="result-visual" src="figs/chart-premises.svg" alt="48/57件、84.2%のドーナツ図と57マス。青48マスは全自動判定で非明示、橙9マスは判定が分かれた" style="height:470px">
 
 Note:
 このスライドで話すこと：抽出した前提は、仕様の文章に明示されていたか。自動判定の結果。
 17の定理に由来する延べ57件の前提条件を、89の仕様ファイルと照合しました。「概念」の数え方は補足で説明します。
 主な数字は、10概念中7概念が、すべての自動判定で「仕様の文章に安全性要件として明示されていない」と判定されたことです。
-象徴的なのは、さきほどの「クォーラム」です。この語自体が、稼働中フォークの仕様の散文に一度も出てきません。唯一の出現は、次期フォークの無関係な閾値の箇所だけでした。
+象徴的なのはクォーラムという語です。稼働中フォークの仕様の散文に一度も出てきません。唯一の出現は、次期フォークの無関係な閾値の箇所だけでした。
 延べ件数では57件中48件で、全員が「明示」と同意した条件は0件でした。57件は同じ概念の反復を含むので、独立した57種類ではありません。
 これはバグの数ではありません。判定はキーワード照合器と6種類のLLMによる自動判定で、正解ラベルとの照合はまだです。判定器どうしが一致した、という意味です。
 次のスライドで、この非明示の前提の一つが、実際のバグと同じラベル圏にあった例を見ます。
@@ -201,10 +299,10 @@ Note:
 
 ## 前提①の具体例：「2/3」は合っている。でも、何の2/3か？
 
-<p class="lead-in">前のスライドで非明示と判定した「クォーラムの重み閾値」について、何が起きうるかを示す。</p>
+<p class="lead-in">非明示と判定した前提の一つ「クォーラムの重み閾値」について、何が起きうるかを示す。</p>
 <p class="label">仮想例（説明用）：8人・等しい重みで集計（色付き＝支持、灰＝対象外）</p>
 <img class="scenario-visual" src="figs/scenario-denominators.svg" alt="実装Aは1〜6を、実装Bは3〜8を有権者（分母）とする。同じ仕様でも使う名簿が違うと分母がずれる。両方4/6だが分母も分子も重ならない">
-<p class="message">両方とも4/6 ＝ 2/3。でも母集団が違えば、<strong>同じ保証は使えない。</strong></p>
+<p class="message">2/3の母集団が異なるため、<strong>エラーが起きる危険がある。</strong></p>
 
 Note:
 このスライドで話すこと：抽出結果のうち「クォーラムの重み閾値」という非明示の前提1つを、具体例で掘り下げる。
@@ -214,7 +312,7 @@ Note:
 
 ---
 
-<p class="section-tag">考察</p>
+<p class="section-tag">実験結果</p>
 
 ## 前提②の具体例：Nimbus #461。壊れていたのは、計算ではなく状態
 
@@ -234,24 +332,33 @@ Note:
 
 ---
 
-<p class="section-tag">まとめ</p>
+<p class="section-tag">考察・まとめ</p>
 
-## まとめ：Leanの前提の多くは、仕様に明示されていなかった
+## 考察・まとめ
 
-<div class="grid three">
-<div class="panel blue"><h3>分かったこと</h3><p>10概念中7概念が、仕様の文章に非明示と判定された（自動判定）。</p></div>
-<div class="panel"><h3>言えること</h3><p>実装者は仕様書だけでなく、論文も読んで、前提を知っておきたい。</p></div>
-<div class="panel orange"><h3>まだ言えないこと</h3><p>SPECAでの効果（発見数の比較）は今後の課題。判定が正解と一致するか。</p></div>
-</div>
-<p class="message">前提が仕様に書かれていれば、Leanは要らない。<br>書かれていないから、証明から取り出した。</p>
+<h3 class="sum-head">考察</h3>
+<ul class="sum">
+<li>前提条件 <strong>57件中48件</strong>（10概念中7概念）が、仕様に安全性要件として明示されていなかった。全アノテータが「明示」と判定した前提は<strong>0件</strong>。</li>
+<li>仕様書には、特に<strong>分解された前提が検査できる要件として</strong>書かれていない。そのため、<strong>セキュリティ監査でも見落とされる可能性がある。</strong></li>
+<li>イーサリアム以外の仕様書についても同様の事象を検討し、必要に応じて<strong>実装検査や仕様書の修正</strong>を行うべき。</li>
+<li>安全性を一度Leanの定理として起こしておけば、<strong>アップグレード後の検証がしやすくなる</strong>。定理は仕様改訂で変わりにくく、見直すのは仕様との対応づけと、実装が前提を保っているかだけで済む。</li>
+</ul>
+<h3 class="sum-head next">今後の課題</h3>
+<ul class="sum">
+<li>下流の監査で実際に効くかは<strong>未評価</strong>。実バグ（Nimbus #461）の修正前コミットで、Lean由来の前提と仕様のみから作ったプロパティを比較する。</li>
+<li>判定したのは機械判定器とLLM 6モデルのみ。<strong>人手の正解ラベルによる検証は未実施</strong>。</li>
+<li>57件は延べ件数で、独立した標本ではない（distinct 10概念）。対象もCasper FFGの正当化・確定に限られる。</li>
+</ul>
 
 Note:
-このスライドで話すこと：分かったことと、まだ言えないこと。
-分かったのは、Leanの定理から取り出した前提のうち、10概念中7概念が、仕様の文章に安全性要件として明示されていないと自動判定されたことです。
-ここから言えるのは、実装者は仕様書を読むだけでなく、論文も読んで、どんな前提で作られているかを理解しておく必要がある、というところまでです。
-前提が仕様に書かれていれば、Leanは要りません。書かれていなかったので、証明から取り出しました。
-まだ言えないのは、確認候補が実際の監査でバグを拾えるか、判定が正解と一致するか、他のシステムでも同じかです。
-今後は、人手の正解ラベルによる検証と、実バグを参照せずに作った項目で、修正前のバグを再検出できるかを試します。ご清聴ありがとうございました。
+このスライドで話すこと：分かったこと、そこから言えること、まだ言えないこと。
+分かったのは、Leanの定理から取り出した前提57件のうち48件、概念でいえば10概念中7概念が、仕様の文章に安全性要件として明示されていないと判定されたことです。全員が「明示されている」と同意した前提は、ひとつもありませんでした。
+ここで誤解のないように申し上げると、安全性の概念が仕様に一切無いという話ではありません。weak-subjectivityの文書には、相反するチェックポイントが確定すれば最低1/3がスラッシュされる、という帰結が散文で書かれています。無いのは、定理が要求する分解された前提が、実装や監査が確認できる要件として与えられていない、ということです。
+ですから、仕様の文章だけを入力とする監査は、これらの前提を拾えません。仕様どおりに実装しても、証明の前提まで満たしているとは限らない、というのが本発表の主張です。
+もう一点、運用の話をします。安全性を一度Leanの定理として起こしておけば、フォークのたびに一から作り直す必要はありません。合意の安全性定理は仕様改訂で変わりにくいので、アップグレードのたびに見直すのは、仕様側のどの箇所に対応するかという紐付けと、実装がその前提を保てているか、の二つだけで済みます。形式化の初期コストは一度きりで、あとは差分の検査になります。
+まだ言えないことが3つあります。一つ目、この前提を監査の入力に加えると実際にバグが拾えるのか。これは未評価で、最優先の課題です。Nimbus 461の修正前コミットを対象に、Lean由来の前提と、仕様だけから作ったプロパティを比べる計画です。
+二つ目、判定したのは機械判定器と6つのLLMだけで、人手の正解ラベルとの照合はまだです。判定器の設計者が著者であるという利益相反も残っています。
+三つ目、57件は延べ件数で、同じ概念の反復を含みます。対象もCasper FFGの正当化と確定に限られます。ほかのBFTプロトコルへの横展開も今後の課題です。ご清聴ありがとうございました。
 
 ---
 

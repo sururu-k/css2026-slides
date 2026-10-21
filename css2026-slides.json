@@ -13,24 +13,14 @@
       "section": "背景",
       "slides": [
         3,
-        4
-      ]
-    },
-    {
-      "section": "先行研究",
-      "slides": [
+        4,
         5,
-        6
-      ]
-    },
-    {
-      "section": "過去の事例",
-      "slides": [
+        6,
         7
       ]
     },
     {
-      "section": "RQ",
+      "section": "研究内容",
       "slides": [
         8
       ]
@@ -46,17 +36,12 @@
       "section": "実験結果",
       "slides": [
         11,
-        12
-      ]
-    },
-    {
-      "section": "考察",
-      "slides": [
+        12,
         13
       ]
     },
     {
-      "section": "まとめ",
+      "section": "考察・まとめ",
       "slides": [
         14
       ]
@@ -203,31 +188,28 @@
     },
     {
       "type": "prior-work",
-      "title": "先行研究：SPECAでは、プロパティ生成が監査の質を決める"
+      "title": "SPECA：プロパティ生成が監査の質を決める"
     },
     {
       "type": "audit-limit",
-      "title": "先行研究の限界：プロパティ生成の入力は、仕様の文章だけ"
+      "title": "SPECAの限界：プロパティ生成の入力は、仕様の文章だけ"
     },
     {
       "type": "lean",
       "title": "Lean: 定理の証明を機械が検査する言語"
     },
     {
-      "type": "question",
-      "title": "RQ：Leanの前提は、仕様の文章にどれだけ明示されているか"
+      "title": "本研究の内容"
     },
     {
-      "type": "method",
-      "title": "提案手法：Leanの前提を取り出し、仕様の文章と突き合わせる"
+      "title": "コンセンサスプロトコルの安全性に関する17の定理から、前提条件が57件"
     },
     {
-      "type": "extraction",
-      "title": "実験手法：定理に書かれた「条件」の部分を取り出す"
+      "title": "文字・意味検索により、定理と関連する3つの仕様書を特定"
     },
     {
       "type": "evaluation",
-      "title": "抽出結果：Leanの前提は、仕様の文章に明示されていなかった"
+      "title": "抽出結果：前提条件は、57件中48件が仕様の文章に明示されていなかった"
     },
     {
       "type": "scenario",
@@ -239,7 +221,7 @@
     },
     {
       "type": "summary",
-      "title": "まとめ：Leanの前提の多くは、仕様に明示されていなかった"
+      "title": "考察・まとめ"
     },
     {
       "type": "appendix",
